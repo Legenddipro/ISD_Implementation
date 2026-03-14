@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+
+  backend:
+    build: ./backend
+    container_name: fastapi_backend
+    restart: always
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    container_name: react_frontend
+    restart: no
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
