@@ -11,6 +11,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from routers.product import router as product_router, category_router
+from routers.cart import router as cart_router
+
+app.include_router(product_router)
+app.include_router(category_router)
+app.include_router(cart_router)
+
 @app.get("/")
 def health_check():
     return {"status": "Backend is running"}
