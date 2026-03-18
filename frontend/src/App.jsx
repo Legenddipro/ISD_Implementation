@@ -7,6 +7,7 @@ Development Guide
 
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import { useEffect } from 'react'
 
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
@@ -17,6 +18,7 @@ import BrowseProductPage from './pages/BrowseProductPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import CartPage from './pages/CartPage'
+import { useAuthStore } from './store/authStore'
 
 const COLORS = {
   primary: '#007bff',
@@ -64,6 +66,14 @@ function ToastProvider({ children }) {
 }
 
 function App() {
+  const initializeAuth = useAuthStore((state) => state.initializeAuth)
+  const hydrateCurrentUser = useAuthStore((state) => state.hydrateCurrentUser)
+
+  useEffect(() => {
+    initializeAuth()
+    hydrateCurrentUser()
+  }, [initializeAuth, hydrateCurrentUser])
+
   return (
     <ToastProvider>
       <BrowserRouter>
