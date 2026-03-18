@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import Icon from '../components/ui/Icon'
 
 import CartItemSkeleton from '../components/CartItemSkeleton'
 import { addToCart, getCart, removeFromCart } from '../api/cartApi'
@@ -326,7 +327,7 @@ function CartPage() {
       <div style={styles.page}>
         <div style={styles.container}>
           <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>🛒</div>
+            <div style={styles.emptyIcon}><Icon name="shopping_cart" size={70} /></div>
             <h2 style={styles.emptyTitle}>Your cart is empty</h2>
             <p style={styles.emptyText}>Looks like you haven't added anything to your cart yet.</p>
             <button
@@ -367,7 +368,7 @@ function CartPage() {
           >
             Home
           </span>
-          <span>›</span>
+          <span><Icon name="chevron_right" size={16} /></span>
           <span>Shopping Cart</span>
         </div>
 
@@ -379,7 +380,7 @@ function CartPage() {
               <h2 style={styles.sectionTitle}>Cart Items</h2>
               {cart.items.map((item) => (
                 <div key={item.id} style={styles.itemRow}>
-                  <div style={styles.itemImage}>📦</div>
+                  <div style={styles.itemImage}><Icon name="inventory_2" size={24} /></div>
 
                   <div style={styles.itemInfo}>
                     <h3 style={styles.productName}>{item.product_name}</h3>
@@ -441,7 +442,7 @@ function CartPage() {
                       e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.12)'
                     }}
                   >
-                    ×
+                    <Icon name="close" size={16} />
                   </button>
                 </div>
               ))}
@@ -486,7 +487,10 @@ function CartPage() {
               </button>
 
               <div style={{ marginTop: '16px', padding: '12px', backgroundColor: 'rgba(253, 197, 0, 0.2)', borderRadius: '8px', fontSize: '13px', color: '#111827' }}>
-                🎉 Free delivery on orders over ৳500
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <Icon name="featured_seasonal_and_gifts" size={16} />
+                  Free delivery on orders over ৳500
+                </span>
               </div>
             </div>
           </div>

@@ -1,5 +1,8 @@
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import Icon from './ui/Icon'
 
+import { getProducts } from '../api/productApi'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useWindowSize } from '../hooks/useWindowSize'
 import { useAuthStore } from '../store/authStore'
@@ -19,14 +22,72 @@ const styles = {
     margin: '0 auto',
     padding: '0 24px',
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: '16px',
     height: '68px',
   },
   leftSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '32px',
+    gap: '18px',
+    flexShrink: 0,
+  },
+  centerSection: {
+    flex: 1,
+    minWidth: 0,
+    maxWidth: '560px',
+    position: 'relative',
+  },
+  searchWrapper: {
+    position: 'relative',
+    width: '100%',
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: '14px',
+    top: '54%',
+    transform: 'translateY(-50%)',
+    color: '#4b5563',
+    pointerEvents: 'none',
+  },
+  searchInput: {
+    width: 'calc(100% - 2px)',
+    height: '42px',
+    borderRadius: '10px',
+    border: 'none',
+    backgroundColor: '#ffffff',
+    color: '#111827',
+    fontSize: '14px',
+    padding: '0 16px 0 42px',
+    boxSizing: 'border-box',
+    outline: 'none',
+    margin: '0 auto',
+    display: 'block',
+  },
+  suggestionsDropdown: {
+    position: 'absolute',
+    top: 'calc(100% + 8px)',
+    left: 0,
+    right: 0,
+    backgroundColor: '#ffffff',
+    border: '1px solid rgba(0, 41, 107, 0.14)',
+    borderRadius: '12px',
+    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.12)',
+    overflow: 'hidden',
+    zIndex: 1200,
+  },
+  suggestionItem: {
+    padding: '10px 14px',
+    cursor: 'pointer',
+    transition: 'background-color 0.15s ease',
+    fontSize: '14px',
+    color: '#111827',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  suggestionIcon: {
+    color: '#4b5563',
   },
   logo: {
     fontSize: '27px',
@@ -50,6 +111,7 @@ const styles = {
   },
   locationIcon: {
     fontSize: '18px',
+    color: '#ffffff',
   },
   locationText: {
     fontSize: '14px',
@@ -71,6 +133,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
+    marginLeft: 'auto',
   },
   cartBadge: {
     position: 'relative',
@@ -87,6 +150,7 @@ const styles = {
   },
   cartIcon: {
     fontSize: '20px',
+    color: '#ffffff',
   },
   cartCount: {
     fontSize: '14px',
@@ -151,8 +215,15 @@ const styles = {
 
 function Navbar() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { width } = useWindowSize()
   const isMobile = width < 768
+
+  const [searchInput, setSearchInput] = useState('')
+  const [allProducts, setAllProducts] = useState([])
+  const [searchSuggestions, setSearchSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const searchRef = useRef(null)
   
   const { address, loading: locationLoading, requestLocation } = useGeolocation()
   const user = useAuthStore((state) => state.user)
@@ -191,6 +262,75 @@ function Navbar() {
     return getDisplayName().charAt(0).toUpperCase() || 'U'
   }
 
+  const generateSearchSuggestions = (query) => {
+    if (!query || query.length < 2) {
+      setSearchSuggestions([])
+      return
+    }
+
+    const suggestions = allProducts
+      .filter((product) => product.name.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, 5)
+      .map((product) => product.name)
+
+    setSearchSuggestions(suggestions)
+  }
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value
+    setSearchInput(query)
+    setShowSuggestions(true)
+    generateSearchSuggestions(query)
+  }
+
+  const handleSearchSubmit = (query = searchInput) => {
+    const nextQuery = query.trim()
+    setShowSuggestions(false)
+    navigate(nextQuery ? `/?q=${encodeURIComponent(nextQuery)}` : '/')
+  }
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit()
+    }
+  }
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchInput(suggestion)
+    handleSearchSubmit(suggestion)
+  }
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search).get('q') || ''
+    setSearchInput(query)
+  }, [location.pathname, location.search])
+
+  useEffect(() => {
+    const fetchAllProducts = async () => {
+      try {
+        const response = await getProducts()
+        setAllProducts(response.data)
+      } catch (error) {
+        setAllProducts([])
+      }
+    }
+
+    fetchAllProducts()
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSuggestions(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
   if (isMobile) {
     return (
       <nav style={styles.navbar}>
@@ -203,6 +343,43 @@ function Navbar() {
           `}
         </style>
         <div style={{ ...styles.container, flexDirection: 'column', height: 'auto', padding: '12px 16px', gap: '12px' }}>
+          <div style={{ width: '100%' }} ref={searchRef}>
+            <div style={styles.searchWrapper}>
+              <span style={styles.searchIcon}>
+                <Icon name="search" size={20} style={{ fontVariationSettings: '"wght" 700' }} />
+              </span>
+              <input
+                type="text"
+                style={{ ...styles.searchInput, height: '40px' }}
+                placeholder="Search products..."
+                value={searchInput}
+                onChange={handleSearchChange}
+                onKeyDown={handleSearchKeyDown}
+                onFocus={() => searchInput && setShowSuggestions(true)}
+              />
+              {showSuggestions && searchSuggestions.length > 0 && (
+                <div style={styles.suggestionsDropdown}>
+                  {searchSuggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      style={styles.suggestionItem}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f3f4f6'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                      }}
+                    >
+                      <span style={styles.suggestionIcon}><Icon name="search" size={14} /></span>
+                      {suggestion}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
             <div style={{ ...styles.logo, fontSize: '24px' }} onClick={() => navigate('/')}>
               Chaldal
@@ -213,7 +390,7 @@ function Navbar() {
                 onClick={toggleCart}
                 title="View cart"
               >
-                <span style={{ ...styles.cartIcon, fontSize: '18px' }}>🛒</span>
+                <Icon name="shopping_cart" size={18} style={styles.cartIcon} />
                 <span style={{ ...styles.cartCount, fontSize: '13px' }}>{cartCount}</span>
               </div>
               {isLoggedIn ? (
@@ -230,7 +407,7 @@ function Navbar() {
               onClick={requestLocation}
               title="Update location"
             >
-              <span style={styles.locationIcon}>📍</span>
+              <Icon name="location_on" size={18} style={styles.locationIcon} />
               {locationLoading ? (
                 <div style={{ ...styles.skeleton, width: '100px' }} />
               ) : (
@@ -292,7 +469,7 @@ function Navbar() {
               e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.45)'
             }}
           >
-            <span style={styles.locationIcon}>📍</span>
+            <Icon name="location_on" size={18} style={styles.locationIcon} />
             {locationLoading ? (
               <div style={styles.skeleton} />
             ) : (
@@ -311,8 +488,51 @@ function Navbar() {
                 e.currentTarget.style.transform = 'rotate(0deg)'
               }}
             >
-              ↻
+              <Icon name="refresh" size={14} style={{ color: '#ffffff' }} />
             </span>
+          </div>
+        </div>
+
+        <div style={styles.centerSection} ref={searchRef}>
+          <div style={styles.searchWrapper}>
+            <span style={styles.searchIcon}>
+              <Icon name="search" size={20} style={{ fontVariationSettings: '"wght" 700' }} />
+            </span>
+            <input
+              type="text"
+              style={styles.searchInput}
+              placeholder="Search for products..."
+              value={searchInput}
+              onChange={handleSearchChange}
+              onKeyDown={handleSearchKeyDown}
+              onFocus={() => searchInput && setShowSuggestions(true)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 0 2px rgba(0, 80, 157, 0.18)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = 'none'
+              }}
+            />
+            {showSuggestions && searchSuggestions.length > 0 && (
+              <div style={styles.suggestionsDropdown}>
+                {searchSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    style={styles.suggestionItem}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.08)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <span style={styles.suggestionIcon}><Icon name="search" size={14} /></span>
+                    {suggestion}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -330,7 +550,7 @@ function Navbar() {
               e.currentTarget.style.transform = 'scale(1)'
             }}
           >
-            <span style={styles.cartIcon}>🛒</span>
+            <Icon name="shopping_cart" size={20} style={styles.cartIcon} />
             <span style={styles.cartCount}>{cartCount}</span>
           </div>
 

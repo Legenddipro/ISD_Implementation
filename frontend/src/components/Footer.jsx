@@ -1,3 +1,5 @@
+import Icon from './ui/Icon'
+
 const styles = {
   footer: {
     backgroundColor: 'var(--imperial-blue)',
@@ -92,7 +94,7 @@ function Footer() {
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
-              f
+              <Icon name="public" size={18} />
             </div>
             <div
               style={styles.socialIcon}
@@ -105,7 +107,7 @@ function Footer() {
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
-              📷
+              <Icon name="photo_camera" size={18} />
             </div>
             <div
               style={styles.socialIcon}
@@ -118,7 +120,7 @@ function Footer() {
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
-              ▶
+              <Icon name="smart_display" size={18} />
             </div>
           </div>
         </div>
@@ -189,9 +191,9 @@ function Footer() {
 
         <div style={styles.column}>
           <h3 style={styles.heading}>Contact Info</h3>
-          <p style={styles.description}>📧 support@chaldal.com</p>
-          <p style={styles.description}>📞 +880 1234-567890</p>
-          <p style={styles.description}>📍 Kafrul, Dhaka, Bangladesh</p>
+          <p style={{ ...styles.description, display: 'flex', alignItems: 'center', gap: '8px' }}><Icon name="mail" size={16} /> support@chaldal.com</p>
+          <p style={{ ...styles.description, display: 'flex', alignItems: 'center', gap: '8px' }}><Icon name="call" size={16} /> +880 1234-567890</p>
+          <p style={{ ...styles.description, display: 'flex', alignItems: 'center', gap: '8px' }}><Icon name="location_on" size={16} /> Kafrul, Dhaka, Bangladesh</p>
           <p style={{ ...styles.description, marginTop: '8px' }}>
             Mon - Sat: 8:00 AM - 10:00 PM<br />
             Sunday: 9:00 AM - 6:00 PM

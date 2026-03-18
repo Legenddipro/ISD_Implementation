@@ -24,20 +24,6 @@ const styles = {
     padding: '32px',
     border: '1px solid #dce4ef',
   },
-  logo: {
-    textAlign: 'center',
-    marginBottom: '32px',
-  },
-  logoText: {
-    fontSize: '32px',
-    fontWeight: 800,
-    color: 'var(--imperial-blue)',
-    marginBottom: '8px',
-  },
-  logoSubtext: {
-    fontSize: '14px',
-    color: 'var(--text-muted)',
-  },
   title: {
     margin: '0 0 8px 0',
     color: '#111827',
@@ -159,11 +145,6 @@ function RegisterPage() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <div style={styles.logo}>
-          <div style={styles.logoText}>Chaldal</div>
-          <div style={styles.logoSubtext}>Fresh Groceries Delivered</div>
-        </div>
-
         <h1 style={styles.title}>Create Account</h1>
         <p style={styles.subtitle}>Join us and start shopping today</p>
 

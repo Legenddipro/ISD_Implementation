@@ -1,4 +1,5 @@
 import { useWindowSize } from '../hooks/useWindowSize'
+import Icon from './ui/Icon'
 
 const styles = {
   modal: {
@@ -237,14 +238,14 @@ function CartModal({
                 e.currentTarget.style.backgroundColor = '#ffffff'
               }}
             >
-              ×
+              <Icon name="close" size={18} />
             </button>
           </div>
 
           <div style={styles.itemsSection}>
             {!cartItems || cartItems.length === 0 ? (
               <div style={styles.emptyState}>
-                <div style={styles.emptyIcon}>🛒</div>
+                <div style={styles.emptyIcon}><Icon name="shopping_cart" size={44} /></div>
                 <p style={styles.emptyText}>Your cart is empty</p>
               </div>
             ) : (
@@ -312,7 +313,7 @@ function CartModal({
                         e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.12)'
                       }}
                     >
-                      ×
+                      <Icon name="close" size={14} />
                     </button>
                   </div>
                   <p style={{ ...styles.itemMeta, ...styles.itemMetaHighlight, fontSize: '15px', marginTop: '8px' }}>
@@ -367,14 +368,14 @@ function CartModal({
             e.currentTarget.style.backgroundColor = '#ffffff'
           }}
         >
-          ×
+          <Icon name="close" size={18} />
         </button>
       </div>
 
       <div style={styles.itemsSection}>
         {!cartItems || cartItems.length === 0 ? (
           <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>🛒</div>
+            <div style={styles.emptyIcon}><Icon name="shopping_cart" size={44} /></div>
             <p style={styles.emptyText}>Your cart is empty</p>
           </div>
         ) : (
@@ -442,7 +443,7 @@ function CartModal({
                     e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.12)'
                   }}
                 >
-                  ×
+                  <Icon name="close" size={14} />
                 </button>
               </div>
               <p style={{ ...styles.itemMeta, ...styles.itemMetaHighlight, fontSize: '15px', marginTop: '8px' }}>

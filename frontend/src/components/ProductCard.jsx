@@ -1,3 +1,5 @@
+import Icon from './ui/Icon'
+
 const styles = {
   card: {
     backgroundColor: '#ffffff',
@@ -187,7 +189,7 @@ function ProductCard({
         {product?.image_url ? (
           <img src={product.image_url} alt={product.name} style={styles.image} />
         ) : (
-          <span style={styles.placeholderText}>📦</span>
+          <span style={styles.placeholderText}><Icon name="inventory_2" size={18} /></span>
         )}
         {isInStock && (
           <div style={styles.badge}>Fresh</div>
@@ -279,7 +281,7 @@ function ProductCard({
                 'Out of Stock'
               ) : (
                 <>
-                  <span>🛒</span>
+                  <Icon name="shopping_cart" size={16} />
                   Add to Cart
                 </>
               )}

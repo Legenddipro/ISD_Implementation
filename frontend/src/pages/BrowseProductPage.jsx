@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import Icon from '../components/ui/Icon'
 
 import CartModal from '../components/CartModal'
 import ProductCard from '../components/ProductCard'
@@ -113,62 +114,8 @@ const styles = {
     top: '50%',
     transform: 'translateY(-50%)',
     fontSize: '200px',
+    color: '#ffffff',
     opacity: 0.1,
-  },
-  searchWrapper: {
-    position: 'relative',
-    marginBottom: '32px',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  searchInput: {
-    width: '100%',
-    padding: '16px 20px 16px 52px',
-    borderRadius: '12px',
-    border: '2px solid rgba(0, 41, 107, 0.14)',
-    fontSize: '15px',
-    backgroundColor: '#ffffff',
-    color: '#111827',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-    boxSizing: 'border-box',
-  },
-  searchIcon: {
-    position: 'absolute',
-    left: '18px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    fontSize: '20px',
-    color: 'var(--steel-azure)',
-    pointerEvents: 'none',
-  },
-  suggestionsDropdown: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    marginTop: '8px',
-    backgroundColor: '#ffffff',
-    border: '1px solid rgba(0, 41, 107, 0.14)',
-    borderRadius: '12px',
-    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-    maxHeight: '300px',
-    overflowY: 'auto',
-    zIndex: 100,
-  },
-  suggestionItem: {
-    padding: '12px 20px',
-    cursor: 'pointer',
-    transition: 'background-color 0.15s ease',
-    fontSize: '14px',
-    color: '#111827',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  suggestionIcon: {
-    fontSize: '16px',
-    opacity: 0.6,
   },
   sectionTitle: {
     margin: '0 0 24px 0',
@@ -204,33 +151,29 @@ const styles = {
 }
 
 const categoryIcons = {
-  Dairy: '🥛',
-  Grains: '🌾',
-  Bakery: '🍞',
-  Meat: '🍖',
-  Vegetables: '🥬',
-  Fruits: '🍎',
-  Beverages: '🥤',
-  Snacks: '🍿',
+  Dairy: 'egg_alt',
+  Grains: 'grain',
+  Bakery: 'bakery_dining',
+  Meat: 'lunch_dining',
+  Vegetables: 'nutrition',
+  Fruits: 'nutrition',
+  Beverages: 'local_cafe',
+  Snacks: 'cookie',
 }
 
 function BrowseProductPage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const searchQuery = searchParams.get('q') || ''
 
   const [products, setProducts] = useState([])
-  const [allProducts, setAllProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchSuggestions, setSearchSuggestions] = useState([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
   const [loading, setLoading] = useState(true)
   const [addingProductId, setAddingProductId] = useState(null)
   const [updatingProductId, setUpdatingProductId] = useState(null)
   const [updatingItemId, setUpdatingItemId] = useState(null)
-  
-  const searchRef = useRef(null)
-  const searchDebounceRef = useRef(null)
+
   const { width } = useWindowSize()
   const isMobile = width < 1024
 
@@ -252,12 +195,10 @@ function BrowseProductPage() {
     cartItems.find((item) => Number(item?.product_id) === Number(productId))
 
   const fetchProducts = async (currentSearch = '', currentCategory = selectedCategory) => {
+    setLoading(true)
     try {
       const response = await getProducts(currentSearch, currentCategory)
       setProducts(response.data)
-      if (!currentSearch && !currentCategory) {
-        setAllProducts(response.data)
-      }
     } catch (error) {
       toast.error('Failed to fetch products')
     } finally {
@@ -274,55 +215,11 @@ function BrowseProductPage() {
     }
   }
 
-  const generateSearchSuggestions = (query) => {
-    if (!query || query.length < 2) {
-      setSearchSuggestions([])
-      return
-    }
-
-    const suggestions = allProducts
-      .filter(product => 
-        product.name.toLowerCase().includes(query.toLowerCase())
-      )
-      .slice(0, 4)
-      .map(product => product.name)
-
-    setSearchSuggestions(suggestions)
-  }
-
-  const handleCategoryClick = async (categoryId) => {
+  const handleCategoryClick = (categoryId) => {
     const nextCategory = categoryId === selectedCategory ? null : categoryId
     setSelectedCategory(nextCategory)
-    setSearchQuery('')
-    await fetchProducts('', nextCategory)
-  }
-
-  const handleSearchChange = (e) => {
-    const query = e.target.value
-    setSearchQuery(query)
-    setShowSuggestions(true)
-
-    if (searchDebounceRef.current) {
-      clearTimeout(searchDebounceRef.current)
-    }
-
-    generateSearchSuggestions(query)
-  }
-
-  const handleSearchSubmit = async (query = searchQuery) => {
-    setShowSuggestions(false)
-    await fetchProducts(query, selectedCategory)
-  }
-
-  const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(suggestion)
-    setShowSuggestions(false)
-    handleSearchSubmit(suggestion)
-  }
-
-  const handleSearchKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearchSubmit()
+    if (searchQuery) {
+      setSearchParams({})
     }
   }
 
@@ -436,23 +333,12 @@ function BrowseProductPage() {
   }
 
   useEffect(() => {
-    fetchProducts()
     fetchCategories()
-
-    const handleClickOutside = (e) => {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setShowSuggestions(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      if (searchDebounceRef.current) {
-        clearTimeout(searchDebounceRef.current)
-      }
-    }
   }, [])
+
+  useEffect(() => {
+    fetchProducts(searchQuery, selectedCategory)
+  }, [searchQuery, selectedCategory])
 
   if (isMobile) {
     return (
@@ -470,10 +356,13 @@ function BrowseProductPage() {
               }}
               onClick={() => handleCategoryClick(null)}
             >
-              <span style={styles.categoryIcon}>🏪</span>
+              <span style={styles.categoryIcon}><Icon name="storefront" size={18} /></span>
               All Products
             </button>
             {categories.map((category) => (
+              (() => {
+                const categoryIconName = categoryIcons[category.name] || 'inventory_2'
+                return (
               <button
                 key={category.id}
                 type="button"
@@ -485,44 +374,13 @@ function BrowseProductPage() {
                 }}
                 onClick={() => handleCategoryClick(category.id)}
               >
-                <span style={styles.categoryIcon}>{categoryIcons[category.name] || '📦'}</span>
+                <span style={styles.categoryIcon}><Icon name={categoryIconName} size={18} /></span>
                 {category.name}
               </button>
+                )
+              })()
             ))}
           </div>
-        </div>
-
-        <div style={styles.searchWrapper} ref={searchRef}>
-          <span style={styles.searchIcon}>🔍</span>
-          <input
-            type="text"
-            style={styles.searchInput}
-            placeholder="Search for products..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onKeyDown={handleSearchKeyDown}
-            onFocus={() => searchQuery && setShowSuggestions(true)}
-          />
-          {showSuggestions && searchSuggestions.length > 0 && (
-            <div style={styles.suggestionsDropdown}>
-              {searchSuggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  style={styles.suggestionItem}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f3f4f6'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }}
-                >
-                  <span style={styles.suggestionIcon}>🔍</span>
-                  {suggestion}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         <div style={{ ...styles.banner, padding: '0 30px', height: '200px' }}>
@@ -541,7 +399,7 @@ function BrowseProductPage() {
           </div>
         ) : products.length === 0 ? (
           <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>🔍</div>
+            <div style={styles.emptyIcon}><Icon name="search_off" size={58} /></div>
             <p style={styles.emptyText}>No products found</p>
             <p style={styles.emptySubtext}>Try adjusting your search or filters</p>
           </div>
@@ -602,11 +460,14 @@ function BrowseProductPage() {
               e.currentTarget.style.backgroundColor = 'transparent'
             }}
           >
-            <span style={styles.categoryIcon}>🏪</span>
+            <span style={styles.categoryIcon}><Icon name="storefront" size={18} /></span>
             All Products
           </button>
 
           {categories.map((category) => (
+            (() => {
+              const categoryIconName = categoryIcons[category.name] || 'inventory_2'
+              return (
             <button
               key={category.id}
               type="button"
@@ -624,9 +485,11 @@ function BrowseProductPage() {
                 e.currentTarget.style.backgroundColor = 'transparent'
               }}
             >
-              <span style={styles.categoryIcon}>{categoryIcons[category.name] || '📦'}</span>
+              <span style={styles.categoryIcon}><Icon name={categoryIconName} size={18} /></span>
               {category.name}
             </button>
+              )
+            })()
           ))}
         </div>
       </aside>
@@ -639,47 +502,6 @@ function BrowseProductPage() {
               <p style={styles.bannerSubtitle}>Get everything you need, delivered to your door</p>
             </div>
             <span style={styles.bannerDecoration}>🛒</span>
-          </div>
-
-          <div style={styles.searchWrapper} ref={searchRef}>
-            <span style={styles.searchIcon}>🔍</span>
-            <input
-              type="text"
-              style={styles.searchInput}
-              placeholder="Search for products (e.g., milk, eggs, bread)..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              onKeyDown={handleSearchKeyDown}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--steel-azure)'
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 80, 157, 0.14)'
-                if (searchQuery) setShowSuggestions(true)
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(0, 41, 107, 0.14)'
-                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)'
-              }}
-            />
-            {showSuggestions && searchSuggestions.length > 0 && (
-              <div style={styles.suggestionsDropdown}>
-                {searchSuggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    style={styles.suggestionItem}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.08)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    <span style={styles.suggestionIcon}>🔍</span>
-                    {suggestion}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           <h2 style={styles.sectionTitle}>
@@ -699,7 +521,7 @@ function BrowseProductPage() {
             </div>
           ) : products.length === 0 ? (
             <div style={styles.emptyState}>
-              <div style={styles.emptyIcon}>🔍</div>
+              <div style={styles.emptyIcon}><Icon name="search_off" size={58} /></div>
               <p style={styles.emptyText}>No products found</p>
               <p style={styles.emptySubtext}>Try adjusting your search or filters</p>
             </div>
