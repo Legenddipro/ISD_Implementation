@@ -1,8 +1,8 @@
 const styles = {
   footer: {
-    backgroundColor: '#1f2937',
+    backgroundColor: 'var(--imperial-blue)',
     color: '#ffffff',
-    marginTop: '80px',
+    marginTop: 0,
   },
   topSection: {
     maxWidth: '1400px',
@@ -20,16 +20,14 @@ const styles = {
   logo: {
     fontSize: '28px',
     fontWeight: 800,
-    background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: 'var(--gold)',
     marginBottom: '12px',
   },
   description: {
     margin: 0,
     lineHeight: 1.7,
     fontSize: '14px',
-    color: '#d1d5db',
+    color: 'rgba(255, 255, 255, 0.85)',
   },
   heading: {
     margin: '0 0 12px 0',
@@ -38,21 +36,21 @@ const styles = {
     color: '#ffffff',
   },
   link: {
-    color: '#d1d5db',
+    color: 'rgba(255, 255, 255, 0.85)',
     fontSize: '14px',
     cursor: 'pointer',
     transition: 'color 0.2s ease',
     textDecoration: 'none',
   },
   bottomSection: {
-    borderTop: '1px solid #374151',
+    borderTop: '1px solid rgba(255, 255, 255, 0.2)',
     padding: '24px',
     textAlign: 'center',
   },
   copyright: {
     margin: 0,
     fontSize: '14px',
-    color: '#9ca3af',
+    color: 'rgba(255, 255, 255, 0.7)',
   },
   socialLinks: {
     display: 'flex',
@@ -63,7 +61,7 @@ const styles = {
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    backgroundColor: '#374151',
+    backgroundColor: 'var(--french-blue)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -86,11 +84,11 @@ function Footer() {
             <div
               style={styles.socialIcon}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#3b5998'
+                e.currentTarget.style.backgroundColor = 'var(--steel-azure)'
                 e.currentTarget.style.transform = 'translateY(-3px)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#374151'
+                e.currentTarget.style.backgroundColor = 'var(--french-blue)'
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
@@ -99,11 +97,11 @@ function Footer() {
             <div
               style={styles.socialIcon}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#E1306C'
+                e.currentTarget.style.backgroundColor = 'var(--steel-azure)'
                 e.currentTarget.style.transform = 'translateY(-3px)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#374151'
+                e.currentTarget.style.backgroundColor = 'var(--french-blue)'
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
@@ -112,11 +110,11 @@ function Footer() {
             <div
               style={styles.socialIcon}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#FF0000'
+                e.currentTarget.style.backgroundColor = 'var(--steel-azure)'
                 e.currentTarget.style.transform = 'translateY(-3px)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#374151'
+                e.currentTarget.style.backgroundColor = 'var(--french-blue)'
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
@@ -130,28 +128,28 @@ function Footer() {
           <span
             style={styles.link}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#d1d5db' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)' }}
           >
             About Us
           </span>
           <span
             style={styles.link}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#d1d5db' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)' }}
           >
             How It Works
           </span>
           <span
             style={styles.link}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#d1d5db' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)' }}
           >
             Careers
           </span>
           <span
             style={styles.link}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#d1d5db' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)' }}
           >
             Press
           </span>
@@ -162,28 +160,28 @@ function Footer() {
           <span
             style={styles.link}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#d1d5db' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)' }}
           >
             Contact Us
           </span>
           <span
             style={styles.link}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#d1d5db' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)' }}
           >
             FAQ
           </span>
           <span
             style={styles.link}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#d1d5db' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)' }}
           >
             Shipping & Returns
           </span>
           <span
             style={styles.link}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#d1d5db' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)' }}
           >
             Terms & Conditions
           </span>

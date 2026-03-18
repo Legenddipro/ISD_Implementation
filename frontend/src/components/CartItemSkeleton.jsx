@@ -7,9 +7,8 @@ const styles = {
     borderBottom: '1px solid #e5e7eb',
   },
   shimmer: {
-    background: 'linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%)',
-    backgroundSize: '200% 100%',
-    animation: 'cart-item-skeleton-shimmer 1.2s infinite linear',
+    backgroundColor: '#e7edf5',
+    animation: 'cart-item-skeleton-pulse 1.2s infinite ease-in-out',
   },
   image: {
     width: '80px',
@@ -55,7 +54,7 @@ function CartItemSkeleton() {
   return (
     <div style={styles.row} aria-hidden="true">
       <style>
-        {`@keyframes cart-item-skeleton-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }`}
+        {`@keyframes cart-item-skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }`}
       </style>
       <div style={{ ...styles.image, ...styles.shimmer }} />
       <div style={styles.info}>

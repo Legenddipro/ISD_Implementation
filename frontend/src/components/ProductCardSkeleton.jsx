@@ -10,9 +10,8 @@ const styles = {
     minHeight: '360px',
   },
   shimmer: {
-    background: 'linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%)',
-    backgroundSize: '200% 100%',
-    animation: 'skeleton-shimmer 1.2s infinite linear',
+    backgroundColor: '#e7edf5',
+    animation: 'skeleton-pulse 1.2s infinite ease-in-out',
   },
   image: {
     width: '100%',
@@ -50,7 +49,7 @@ function ProductCardSkeleton() {
   return (
     <div style={styles.card} aria-hidden="true">
       <style>
-        {`@keyframes skeleton-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }`}
+        {`@keyframes skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }`}
       </style>
       <div style={{ ...styles.image, ...styles.shimmer }} />
       <div style={{ ...styles.lineLg, ...styles.shimmer }} />

@@ -1,8 +1,8 @@
 const styles = {
   card: {
     backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
-    borderRadius: '16px',
+    border: '1px solid rgba(0, 41, 107, 0.12)',
+    borderRadius: '14px',
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
@@ -12,7 +12,7 @@ const styles = {
   },
   imageWrapper: {
     width: '100%',
-    aspectRatio: '1 / 1',
+    aspectRatio: '4 / 3',
     overflow: 'hidden',
     backgroundColor: '#f9fafb',
     display: 'flex',
@@ -30,7 +30,8 @@ const styles = {
     position: 'absolute',
     top: '12px',
     right: '12px',
-    backgroundColor: '#10b981',
+    backgroundColor: 'var(--school-bus-yellow)',
+    border: '1px solid var(--gold)',
     color: '#ffffff',
     padding: '4px 10px',
     borderRadius: '20px',
@@ -45,59 +46,88 @@ const styles = {
     fontWeight: 500,
   },
   content: {
-    padding: '16px',
+    padding: '12px',
     display: 'flex',
     flexDirection: 'column',
     flex: 1,
   },
   category: {
     margin: '0 0 6px 0',
-    fontSize: '12px',
-    color: '#6b7280',
+    fontSize: '11px',
+    color: 'var(--steel-azure)',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
     fontWeight: 600,
   },
   name: {
     margin: 0,
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: 700,
     color: '#111827',
     lineHeight: 1.4,
-    minHeight: '44px',
+    minHeight: '40px',
   },
   priceRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: '12px',
-    paddingTop: '12px',
+    marginTop: '10px',
+    paddingTop: '10px',
     borderTop: '1px solid #f3f4f6',
   },
   price: {
     margin: 0,
-    fontSize: '24px',
+    fontSize: '21px',
     fontWeight: 800,
-    color: '#10b981',
+    color: 'var(--imperial-blue)',
   },
   currency: {
-    fontSize: '16px',
+    fontSize: '14px',
     fontWeight: 600,
   },
   spacer: {
     flex: 1,
   },
   buttonWrapper: {
-    marginTop: '12px',
+    marginTop: '10px',
+  },
+  quantityControls: {
+    marginTop: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '8px',
+  },
+  quantityButton: {
+    width: '34px',
+    height: '34px',
+    border: '1px solid rgba(0, 41, 107, 0.2)',
+    borderRadius: '8px',
+    backgroundColor: '#ffffff',
+    color: 'var(--imperial-blue)',
+    fontSize: '18px',
+    fontWeight: 700,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quantityValue: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: '14px',
+    fontWeight: 700,
+    color: '#111827',
   },
   button: {
     width: '100%',
     border: 'none',
-    borderRadius: '10px',
-    backgroundColor: '#3b82f6',
+    borderRadius: '9px',
+    backgroundColor: 'var(--french-blue)',
     color: '#ffffff',
-    padding: '12px 16px',
-    fontSize: '14px',
+    padding: '10px 14px',
+    fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
@@ -105,7 +135,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)',
+    boxShadow: '0 2px 6px rgba(0, 41, 107, 0.2)',
   },
   spinner: {
     width: '14px',
@@ -117,8 +147,15 @@ const styles = {
   },
 }
 
-function ProductCard({ product, onAddToCart }) {
+function ProductCard({
+  product,
+  onAddToCart,
+  onIncreaseQuantity,
+  onDecreaseQuantity,
+}) {
   const isAdding = Boolean(product?.isAdding)
+  const isUpdatingQuantity = Boolean(product?.isUpdatingQuantity)
+  const quantityInCart = Number(product?.quantityInCart || 0)
   const isInStock = product?.stock_quantity > 0
 
   return (
@@ -168,51 +205,87 @@ function ProductCard({ product, onAddToCart }) {
             <span style={styles.currency}>৳</span>{product?.price}
           </p>
           {product?.stock_quantity < 10 && product?.stock_quantity > 0 && (
-            <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 600 }}>
+            <span style={{ fontSize: '12px', color: 'var(--steel-azure)', fontWeight: 600 }}>
               Only {product.stock_quantity} left
             </span>
           )}
         </div>
 
-        <div style={styles.buttonWrapper}>
-          <button
-            type="button"
-            style={{
-              ...styles.button,
-              opacity: isAdding || !isInStock ? 0.7 : 1,
-              cursor: isAdding || !isInStock ? 'not-allowed' : 'pointer',
-              backgroundColor: !isInStock ? '#9ca3af' : '#3b82f6',
-            }}
-            disabled={isAdding || !isInStock}
-            onClick={() => onAddToCart(product.id)}
-            onMouseEnter={(e) => {
-              if (isAdding || !isInStock) return
-              e.currentTarget.style.backgroundColor = '#2563eb'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(59, 130, 246, 0.3)'
-            }}
-            onMouseLeave={(e) => {
-              if (isAdding || !isInStock) return
-              e.currentTarget.style.backgroundColor = '#3b82f6'
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.2)'
-            }}
-          >
-            {isAdding ? (
-              <>
-                <span style={styles.spinner} />
-                Adding...
-              </>
-            ) : !isInStock ? (
-              'Out of Stock'
-            ) : (
-              <>
-                <span>🛒</span>
-                Add to Cart
-              </>
-            )}
-          </button>
-        </div>
+        {quantityInCart > 0 ? (
+          <div style={styles.quantityControls}>
+            <button
+              type="button"
+              style={styles.quantityButton}
+              disabled={isUpdatingQuantity}
+              onClick={() => onDecreaseQuantity(product.id)}
+              onMouseEnter={(e) => {
+                if (isUpdatingQuantity) return
+                e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff'
+              }}
+            >
+              −
+            </button>
+            <span style={styles.quantityValue}>{quantityInCart}</span>
+            <button
+              type="button"
+              style={styles.quantityButton}
+              disabled={isUpdatingQuantity}
+              onClick={() => onIncreaseQuantity(product.id)}
+              onMouseEnter={(e) => {
+                if (isUpdatingQuantity) return
+                e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff'
+              }}
+            >
+              +
+            </button>
+          </div>
+        ) : (
+          <div style={styles.buttonWrapper}>
+            <button
+              type="button"
+              style={{
+                ...styles.button,
+                opacity: isAdding || !isInStock ? 0.7 : 1,
+                cursor: isAdding || !isInStock ? 'not-allowed' : 'pointer',
+                backgroundColor: !isInStock ? '#9ca3af' : 'var(--french-blue)',
+              }}
+              disabled={isAdding || !isInStock}
+              onClick={() => onAddToCart(product.id)}
+              onMouseEnter={(e) => {
+                if (isAdding || !isInStock) return
+                e.currentTarget.style.backgroundColor = 'var(--imperial-blue)'
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 41, 107, 0.28)'
+              }}
+              onMouseLeave={(e) => {
+                if (isAdding || !isInStock) return
+                e.currentTarget.style.backgroundColor = 'var(--french-blue)'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 41, 107, 0.2)'
+              }}
+            >
+              {isAdding ? (
+                <>
+                  <span style={styles.spinner} />
+                  Adding...
+                </>
+              ) : !isInStock ? (
+                'Out of Stock'
+              ) : (
+                <>
+                  <span>🛒</span>
+                  Add to Cart
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

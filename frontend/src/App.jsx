@@ -21,26 +21,34 @@ import CartPage from './pages/CartPage'
 import { useAuthStore } from './store/authStore'
 
 const COLORS = {
-  primary: '#007bff',
-  success: '#28a745',
-  danger: '#dc3545',
-  light: '#f8f9fa',
-  dark: '#343a40',
+  imperialBlue: '#00296b',
+  frenchBlue: '#003f88',
+  steelAzure: '#00509d',
+  schoolBusYellow: '#fdc500',
+  gold: '#ffd500',
+  white: '#ffffff',
+  black: '#111827',
+  surface: '#f4f7fb',
+  mutedText: '#4b5563',
 }
 
 const styles = {
   app: {
-    '--color-primary': COLORS.primary,
-    '--color-success': COLORS.success,
-    '--color-danger': COLORS.danger,
-    '--color-light': COLORS.light,
-    '--color-dark': COLORS.dark,
+    '--imperial-blue': COLORS.imperialBlue,
+    '--french-blue': COLORS.frenchBlue,
+    '--steel-azure': COLORS.steelAzure,
+    '--school-bus-yellow': COLORS.schoolBusYellow,
+    '--gold': COLORS.gold,
+    '--text-black': COLORS.black,
+    '--text-white': COLORS.white,
+    '--text-muted': COLORS.mutedText,
     fontFamily: '"Roboto", sans-serif',
+    lineHeight: 1.5,
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: 'var(--color-light)',
-    color: 'var(--color-dark)',
+    backgroundColor: COLORS.surface,
+    color: COLORS.black,
   },
   content: {
     flex: 1,

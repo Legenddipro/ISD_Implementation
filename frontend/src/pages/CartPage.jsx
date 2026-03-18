@@ -10,7 +10,7 @@ import { useCartStore } from '../store/cartStore'
 const styles = {
   page: {
     minHeight: 'calc(100vh - 72px)',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#f7f9fc',
   },
   container: {
     maxWidth: '1400px',
@@ -32,7 +32,7 @@ const styles = {
     color: '#6b7280',
   },
   breadcrumbLink: {
-    color: '#3b82f6',
+    color: 'var(--french-blue)',
     cursor: 'pointer',
     transition: 'color 0.2s ease',
   },
@@ -56,7 +56,7 @@ const styles = {
     borderRadius: '16px',
     padding: '24px',
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e5e7eb',
+    border: '1px solid rgba(0, 41, 107, 0.12)',
   },
   sectionTitle: {
     margin: '0 0 20px 0',
@@ -129,7 +129,7 @@ const styles = {
   subtotal: {
     fontSize: '18px',
     fontWeight: 800,
-    color: '#10b981',
+    color: 'var(--imperial-blue)',
     minWidth: '100px',
     textAlign: 'right',
   },
@@ -138,8 +138,8 @@ const styles = {
     height: '36px',
     border: 'none',
     borderRadius: '8px',
-    backgroundColor: '#fee2e2',
-    color: '#ef4444',
+    backgroundColor: 'rgba(0, 80, 157, 0.12)',
+    color: 'var(--imperial-blue)',
     fontSize: '20px',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
@@ -153,7 +153,7 @@ const styles = {
     borderRadius: '16px',
     padding: '24px',
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e5e7eb',
+    border: '1px solid rgba(0, 41, 107, 0.12)',
   },
   summaryTitle: {
     margin: '0 0 20px 0',
@@ -185,14 +185,14 @@ const styles = {
     marginTop: '20px',
     border: 'none',
     borderRadius: '12px',
-    backgroundColor: '#10b981',
+    backgroundColor: 'var(--french-blue)',
     color: '#ffffff',
     padding: '16px',
     fontSize: '16px',
     fontWeight: 700,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)',
+    boxShadow: '0 2px 6px rgba(0, 41, 107, 0.22)',
   },
   emptyState: {
     textAlign: 'center',
@@ -216,14 +216,14 @@ const styles = {
   continueButton: {
     border: 'none',
     borderRadius: '12px',
-    backgroundColor: '#3b82f6',
+    backgroundColor: 'var(--french-blue)',
     color: '#ffffff',
     padding: '14px 28px',
     fontSize: '16px',
     fontWeight: 700,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)',
+    boxShadow: '0 2px 6px rgba(0, 41, 107, 0.22)',
   },
 }
 
@@ -334,14 +334,14 @@ function CartPage() {
               style={styles.continueButton}
               onClick={() => navigate('/')}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#2563eb'
+                e.currentTarget.style.backgroundColor = 'var(--imperial-blue)'
                 e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 4px 8px rgba(59, 130, 246, 0.3)'
+                e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 41, 107, 0.28)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#3b82f6'
+                e.currentTarget.style.backgroundColor = 'var(--french-blue)'
                 e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.2)'
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 41, 107, 0.22)'
               }}
             >
               Start Shopping
@@ -362,8 +362,8 @@ function CartPage() {
           <span
             style={styles.breadcrumbLink}
             onClick={() => navigate('/')}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#3b82f6' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--imperial-blue)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--french-blue)' }}
           >
             Home
           </span>
@@ -435,10 +435,10 @@ function CartPage() {
                     onClick={() => handleRemoveItem(item.id)}
                     onMouseEnter={(e) => {
                       if (removingItemId === item.id) return
-                      e.currentTarget.style.backgroundColor = '#fecaca'
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.24)'
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#fee2e2'
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.12)'
                     }}
                   >
                     ×
@@ -472,20 +472,20 @@ function CartPage() {
                 style={styles.checkoutButton}
                 onClick={handleProceedToOrder}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#059669'
+                  e.currentTarget.style.backgroundColor = 'var(--imperial-blue)'
                   e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.3)'
+                  e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 41, 107, 0.28)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#10b981'
+                  e.currentTarget.style.backgroundColor = 'var(--french-blue)'
                   e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(16, 185, 129, 0.2)'
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 41, 107, 0.22)'
                 }}
               >
                 Proceed to Checkout
               </button>
 
-              <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#fef3c7', borderRadius: '8px', fontSize: '13px', color: '#92400e' }}>
+              <div style={{ marginTop: '16px', padding: '12px', backgroundColor: 'rgba(253, 197, 0, 0.2)', borderRadius: '8px', fontSize: '13px', color: '#111827' }}>
                 🎉 Free delivery on orders over ৳500
               </div>
             </div>

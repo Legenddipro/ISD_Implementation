@@ -10,9 +10,9 @@ const styles = {
     position: 'sticky',
     top: 0,
     zIndex: 1000,
-    backgroundColor: '#ffffff',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: 'var(--french-blue)',
+    boxShadow: '0 1px 4px rgba(0, 41, 107, 0.08)',
+    borderBottom: '1px solid rgba(0, 41, 107, 0.16)',
   },
   container: {
     maxWidth: '1440px',
@@ -21,7 +21,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: '72px',
+    height: '68px',
   },
   leftSection: {
     display: 'flex',
@@ -29,11 +29,10 @@ const styles = {
     gap: '32px',
   },
   logo: {
-    fontSize: '28px',
+    fontSize: '27px',
     fontWeight: 800,
-    background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: '#ffffff',
+    textShadow: '0 1px 2px rgba(0, 41, 107, 0.4)',
     cursor: 'pointer',
     letterSpacing: '-0.5px',
   },
@@ -41,10 +40,11 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    padding: '8px 14px',
-    backgroundColor: '#f9fafb',
+    height: '40px',
+    padding: '0 16px',
+    backgroundColor: 'rgba(0, 41, 107, 0.22)',
     borderRadius: '8px',
-    border: '1px solid #e5e7eb',
+    border: '1px solid rgba(255, 255, 255, 0.4)',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
   },
@@ -53,18 +53,18 @@ const styles = {
   },
   locationText: {
     fontSize: '14px',
-    color: '#374151',
+    color: '#ffffff',
     fontWeight: 500,
   },
   locationLabel: {
     fontSize: '11px',
-    color: '#9ca3af',
+    color: 'rgba(255, 255, 255, 0.85)',
     marginRight: '4px',
   },
   refreshIcon: {
     fontSize: '14px',
     cursor: 'pointer',
-    color: '#6b7280',
+    color: '#ffffff',
     transition: 'transform 0.3s ease',
   },
   rightSection: {
@@ -74,15 +74,16 @@ const styles = {
   },
   cartBadge: {
     position: 'relative',
-    padding: '8px 16px',
-    backgroundColor: '#fef3c7',
+    height: '40px',
+    padding: '0 16px',
+    backgroundColor: 'rgba(0, 41, 107, 0.92)',
     borderRadius: '20px',
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    border: '1px solid #fde68a',
+    border: '1px solid var(--french-blue)',
   },
   cartIcon: {
     fontSize: '20px',
@@ -90,38 +91,41 @@ const styles = {
   cartCount: {
     fontSize: '14px',
     fontWeight: 700,
-    color: '#92400e',
+    color: '#ffffff',
   },
   userInfo: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '8px 16px',
-    backgroundColor: '#f3f4f6',
+    gap: '8px',
+    height: '40px',
+    padding: '0 12px',
+    backgroundColor: 'rgba(0, 41, 107, 0.18)',
     borderRadius: '8px',
+    border: '1px solid rgba(255, 255, 255, 0.24)',
   },
   avatar: {
-    width: '36px',
-    height: '36px',
+    width: '28px',
+    height: '28px',
     borderRadius: '50%',
-    backgroundColor: '#3b82f6',
-    color: '#ffffff',
+    backgroundColor: 'var(--imperial-blue)',
+    color: 'var(--gold)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontWeight: 700,
-    fontSize: '14px',
+    fontSize: '12px',
   },
   userName: {
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: 600,
-    color: '#111827',
+    color: '#ffffff',
   },
   button: {
     border: 'none',
-    backgroundColor: '#3b82f6',
+    backgroundColor: 'rgba(0, 41, 107, 0.95)',
     color: '#ffffff',
-    padding: '10px 20px',
+    height: '40px',
+    padding: '0 20px',
     borderRadius: '8px',
     cursor: 'pointer',
     fontSize: '14px',
@@ -130,12 +134,16 @@ const styles = {
     boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
   },
   logoutButton: {
-    backgroundColor: '#ef4444',
+    backgroundColor: '#ffffff',
+    color: 'var(--imperial-blue)',
+    border: 'none',
+    padding: '0 12px',
+    fontSize: '13px',
   },
   skeleton: {
     width: '120px',
     height: '16px',
-    backgroundColor: '#e5e7eb',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: '4px',
     animation: 'skeleton-pulse 1.5s ease-in-out infinite',
   },
@@ -276,12 +284,12 @@ function Navbar() {
             onClick={requestLocation}
             title="Click to update location"
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f3f4f6'
-              e.currentTarget.style.borderColor = '#d1d5db'
+              e.currentTarget.style.backgroundColor = 'rgba(0, 41, 107, 0.3)'
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.75)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f9fafb'
-              e.currentTarget.style.borderColor = '#e5e7eb'
+              e.currentTarget.style.backgroundColor = 'rgba(0, 41, 107, 0.22)'
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.45)'
             }}
           >
             <span style={styles.locationIcon}>📍</span>
@@ -314,11 +322,11 @@ function Navbar() {
             onClick={toggleCart}
             title="View cart"
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#fde68a'
+              e.currentTarget.style.backgroundColor = 'var(--french-blue)'
               e.currentTarget.style.transform = 'scale(1.05)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#fef3c7'
+              e.currentTarget.style.backgroundColor = 'var(--imperial-blue)'
               e.currentTarget.style.transform = 'scale(1)'
             }}
           >
@@ -337,12 +345,12 @@ function Navbar() {
                 style={{ ...styles.button, ...styles.logoutButton }}
                 onClick={handleLogout}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#dc2626'
+                  e.currentTarget.style.backgroundColor = '#eef4ff'
                   e.currentTarget.style.transform = 'translateY(-1px)'
                   e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ef4444'
+                  e.currentTarget.style.backgroundColor = '#ffffff'
                   e.currentTarget.style.transform = 'translateY(0)'
                   e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)'
                 }}
@@ -356,12 +364,12 @@ function Navbar() {
               style={styles.button}
               onClick={handleLogin}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#2563eb'
+                e.currentTarget.style.backgroundColor = 'var(--french-blue)'
                 e.currentTarget.style.transform = 'translateY(-1px)'
                 e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#3b82f6'
+                e.currentTarget.style.backgroundColor = 'var(--imperial-blue)'
                 e.currentTarget.style.transform = 'translateY(0)'
                 e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)'
               }}

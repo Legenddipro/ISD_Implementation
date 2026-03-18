@@ -14,17 +14,17 @@ import { useCartStore } from '../store/cartStore'
 const styles = {
   page: {
     display: 'flex',
-    minHeight: 'calc(100vh - 72px)',
-    backgroundColor: '#f9fafb',
+    minHeight: 'calc(100vh - 68px)',
+    backgroundColor: '#f7f9fc',
   },
   sidebar: {
-    width: '280px',
-    height: 'calc(100vh - 72px)',
+    width: '240px',
+    height: 'calc(100vh - 68px)',
     position: 'sticky',
-    top: '72px',
+    top: '68px',
     overflowY: 'auto',
     backgroundColor: '#ffffff',
-    borderRight: '1px solid #e5e7eb',
+    borderRight: '1px solid rgba(0, 41, 107, 0.1)',
     padding: '24px 0',
     flexShrink: 0,
     scrollBehavior: 'smooth',
@@ -38,7 +38,7 @@ const styles = {
     fontWeight: 700,
     color: '#111827',
     paddingBottom: '12px',
-    borderBottom: '2px solid #f3f4f6',
+    borderBottom: '2px solid rgba(0, 80, 157, 0.14)',
   },
   categoryButton: {
     width: '100%',
@@ -46,7 +46,7 @@ const styles = {
     border: 'none',
     borderRadius: '10px',
     backgroundColor: 'transparent',
-    color: '#374151',
+    color: '#111827',
     fontSize: '15px',
     fontWeight: 500,
     padding: '12px 16px',
@@ -58,10 +58,10 @@ const styles = {
     gap: '10px',
   },
   categoryButtonActive: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: 'var(--french-blue)',
     color: '#ffffff',
     fontWeight: 600,
-    boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)',
+    boxShadow: '0 2px 6px rgba(0, 41, 107, 0.24)',
   },
   categoryIcon: {
     fontSize: '18px',
@@ -79,7 +79,7 @@ const styles = {
   banner: {
     height: '280px',
     borderRadius: '16px',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    backgroundColor: 'var(--imperial-blue)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -103,7 +103,7 @@ const styles = {
   },
   bannerSubtitle: {
     margin: 0,
-    color: '#e0e7ff',
+    color: 'rgba(255, 255, 255, 0.85)',
     fontSize: '18px',
     fontWeight: 400,
   },
@@ -125,7 +125,7 @@ const styles = {
     width: '100%',
     padding: '16px 20px 16px 52px',
     borderRadius: '12px',
-    border: '2px solid #e5e7eb',
+    border: '2px solid rgba(0, 41, 107, 0.14)',
     fontSize: '15px',
     backgroundColor: '#ffffff',
     color: '#111827',
@@ -139,7 +139,7 @@ const styles = {
     top: '50%',
     transform: 'translateY(-50%)',
     fontSize: '20px',
-    color: '#9ca3af',
+    color: 'var(--steel-azure)',
     pointerEvents: 'none',
   },
   suggestionsDropdown: {
@@ -149,7 +149,7 @@ const styles = {
     right: 0,
     marginTop: '8px',
     backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
+    border: '1px solid rgba(0, 41, 107, 0.14)',
     borderRadius: '12px',
     boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
     maxHeight: '300px',
@@ -161,7 +161,7 @@ const styles = {
     cursor: 'pointer',
     transition: 'background-color 0.15s ease',
     fontSize: '14px',
-    color: '#374151',
+    color: '#111827',
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
@@ -178,8 +178,8 @@ const styles = {
   },
   productsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-    gap: '24px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+    gap: '18px',
     width: '100%',
   },
   emptyState: {
@@ -192,13 +192,13 @@ const styles = {
   },
   emptyText: {
     margin: '0 0 8px 0',
-    color: '#6b7280',
+    color: '#111827',
     fontSize: '18px',
     fontWeight: 600,
   },
   emptySubtext: {
     margin: 0,
-    color: '#9ca3af',
+    color: '#4b5563',
     fontSize: '14px',
   },
 }
@@ -226,6 +226,8 @@ function BrowseProductPage() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [loading, setLoading] = useState(true)
   const [addingProductId, setAddingProductId] = useState(null)
+  const [updatingProductId, setUpdatingProductId] = useState(null)
+  const [updatingItemId, setUpdatingItemId] = useState(null)
   
   const searchRef = useRef(null)
   const searchDebounceRef = useRef(null)
@@ -239,6 +241,15 @@ function BrowseProductPage() {
   const setCart = useCartStore((state) => state.setCart)
   const openCart = useCartStore((state) => state.openCart)
   const closeCart = useCartStore((state) => state.closeCart)
+
+  const refreshCart = async () => {
+    const response = await getCart()
+    setCart(response.data)
+    return response.data
+  }
+
+  const getCartItemByProductId = (productId) =>
+    cartItems.find((item) => Number(item?.product_id) === Number(productId))
 
   const fetchProducts = async (currentSearch = '', currentCategory = selectedCategory) => {
     try {
@@ -325,14 +336,50 @@ function BrowseProductPage() {
     setAddingProductId(productId)
     try {
       await addToCart(productId, 1)
-      const response = await getCart()
-      setCart(response.data)
+      await refreshCart()
       openCart()
       toast.success('Item added to cart')
     } catch (error) {
       toast.error(error?.response?.data?.detail || 'Failed to add item to cart')
     } finally {
       setAddingProductId(null)
+    }
+  }
+
+  const handleIncreaseProductQuantity = async (productId) => {
+    if (!isLoggedIn) {
+      toast.error('Please login to update cart')
+      navigate('/login')
+      return
+    }
+
+    setUpdatingProductId(productId)
+    try {
+      await addToCart(productId, 1)
+      await refreshCart()
+    } catch (error) {
+      toast.error('Failed to update quantity')
+    } finally {
+      setUpdatingProductId(null)
+    }
+  }
+
+  const handleDecreaseProductQuantity = async (productId) => {
+    const cartItem = getCartItemByProductId(productId)
+    if (!cartItem) return
+
+    setUpdatingProductId(productId)
+    try {
+      const nextQuantity = Number(cartItem.quantity || 0) - 1
+      await removeFromCart(cartItem.id)
+      if (nextQuantity > 0) {
+        await addToCart(productId, nextQuantity)
+      }
+      await refreshCart()
+    } catch (error) {
+      toast.error('Failed to update quantity')
+    } finally {
+      setUpdatingProductId(null)
     }
   }
 
@@ -344,6 +391,42 @@ function BrowseProductPage() {
       toast.success('Item removed')
     } catch (error) {
       toast.error('Failed to remove item from cart')
+    }
+  }
+
+  const handleIncreaseCartItem = async (itemId) => {
+    const cartItem = cartItems.find((item) => item.id === itemId)
+    if (!cartItem) return
+
+    setUpdatingItemId(itemId)
+    try {
+      const nextQuantity = Number(cartItem.quantity || 0) + 1
+      await removeFromCart(itemId)
+      await addToCart(cartItem.product_id, nextQuantity)
+      await refreshCart()
+    } catch (error) {
+      toast.error('Failed to update quantity')
+    } finally {
+      setUpdatingItemId(null)
+    }
+  }
+
+  const handleDecreaseCartItem = async (itemId) => {
+    const cartItem = cartItems.find((item) => item.id === itemId)
+    if (!cartItem) return
+
+    setUpdatingItemId(itemId)
+    try {
+      const nextQuantity = Number(cartItem.quantity || 0) - 1
+      await removeFromCart(itemId)
+      if (nextQuantity > 0) {
+        await addToCart(cartItem.product_id, nextQuantity)
+      }
+      await refreshCart()
+    } catch (error) {
+      toast.error('Failed to update quantity')
+    } finally {
+      setUpdatingItemId(null)
     }
   }
 
@@ -467,8 +550,15 @@ function BrowseProductPage() {
             {products.map((product) => (
               <ProductCard
                 key={product.id}
-                product={{ ...product, isAdding: addingProductId === product.id }}
+                product={{
+                  ...product,
+                  isAdding: addingProductId === product.id,
+                  quantityInCart: Number(getCartItemByProductId(product.id)?.quantity || 0),
+                  isUpdatingQuantity: updatingProductId === product.id,
+                }}
                 onAddToCart={handleAddToCart}
+                onIncreaseQuantity={handleIncreaseProductQuantity}
+                onDecreaseQuantity={handleDecreaseProductQuantity}
               />
             ))}
           </div>
@@ -481,6 +571,9 @@ function BrowseProductPage() {
             cartItems={cartItems}
             totalPrice={totalPrice}
             onRemoveItem={handleRemoveFromCart}
+            onIncreaseItem={handleIncreaseCartItem}
+            onDecreaseItem={handleDecreaseCartItem}
+            updatingItemId={updatingItemId}
             onCheckout={handleCheckout}
           />
         )}
@@ -524,7 +617,7 @@ function BrowseProductPage() {
               onClick={() => handleCategoryClick(category.id)}
               onMouseEnter={(e) => {
                 if (selectedCategory === category.id) return
-                e.currentTarget.style.backgroundColor = '#f3f4f6'
+                e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.08)'
               }}
               onMouseLeave={(e) => {
                 if (selectedCategory === category.id) return
@@ -558,12 +651,12 @@ function BrowseProductPage() {
               onChange={handleSearchChange}
               onKeyDown={handleSearchKeyDown}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#3b82f6'
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)'
+                e.currentTarget.style.borderColor = 'var(--steel-azure)'
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 80, 157, 0.14)'
                 if (searchQuery) setShowSuggestions(true)
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#e5e7eb'
+                e.currentTarget.style.borderColor = 'rgba(0, 41, 107, 0.14)'
                 e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)'
               }}
             />
@@ -575,7 +668,7 @@ function BrowseProductPage() {
                     style={styles.suggestionItem}
                     onClick={() => handleSuggestionClick(suggestion)}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6'
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.08)'
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = 'transparent'
@@ -615,8 +708,15 @@ function BrowseProductPage() {
               {products.map((product) => (
                 <ProductCard
                   key={product.id}
-                  product={{ ...product, isAdding: addingProductId === product.id }}
+                  product={{
+                    ...product,
+                    isAdding: addingProductId === product.id,
+                    quantityInCart: Number(getCartItemByProductId(product.id)?.quantity || 0),
+                    isUpdatingQuantity: updatingProductId === product.id,
+                  }}
                   onAddToCart={handleAddToCart}
+                  onIncreaseQuantity={handleIncreaseProductQuantity}
+                  onDecreaseQuantity={handleDecreaseProductQuantity}
                 />
               ))}
             </div>
@@ -631,6 +731,9 @@ function BrowseProductPage() {
           cartItems={cartItems}
           totalPrice={totalPrice}
           onRemoveItem={handleRemoveFromCart}
+          onIncreaseItem={handleIncreaseCartItem}
+          onDecreaseItem={handleDecreaseCartItem}
+          updatingItemId={updatingItemId}
           onCheckout={handleCheckout}
         />
       )}

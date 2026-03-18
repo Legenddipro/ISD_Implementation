@@ -3,42 +3,41 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
 import axiosInstance from '../api/axiosInstance'
+import PrimaryButton from '../components/ui/PrimaryButton'
+import TextInputField from '../components/ui/TextInputField'
 import { useAuthStore } from '../store/authStore'
 
 const styles = {
   page: {
-    minHeight: 'calc(100vh - 72px)',
+    minHeight: 'calc(100vh - 68px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '24px',
-    backgroundColor: '#f9fafb',
-    backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%)',
+    padding: '32px 20px',
+    backgroundColor: '#f4f7fb',
   },
   card: {
     width: '100%',
     maxWidth: '440px',
     backgroundColor: '#ffffff',
-    borderRadius: '20px',
-    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
-    padding: '40px',
-    border: '1px solid #e5e7eb',
+    borderRadius: '14px',
+    boxShadow: '0 8px 20px rgba(15, 23, 42, 0.08)',
+    padding: '32px',
+    border: '1px solid #dce4ef',
   },
   logo: {
     textAlign: 'center',
     marginBottom: '32px',
   },
   logoText: {
-    fontSize: '36px',
+    fontSize: '32px',
     fontWeight: 800,
-    background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: 'var(--imperial-blue)',
     marginBottom: '8px',
   },
   logoSubtext: {
     fontSize: '14px',
-    color: '#6b7280',
+    color: 'var(--text-muted)',
   },
   title: {
     margin: '0 0 8px 0',
@@ -48,56 +47,15 @@ const styles = {
     textAlign: 'center',
   },
   subtitle: {
-    margin: '0 0 32px 0',
-    color: '#6b7280',
+    margin: '0 0 28px 0',
+    color: 'var(--text-muted)',
     fontSize: '15px',
     textAlign: 'center',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px',
-  },
-  field: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  label: {
-    color: '#374151',
-    fontSize: '14px',
-    fontWeight: 600,
-  },
-  input: {
-    border: '2px solid #e5e7eb',
-    borderRadius: '10px',
-    padding: '12px 16px',
-    fontSize: '15px',
-    outline: 'none',
-    transition: 'all 0.2s ease',
-    backgroundColor: '#ffffff',
-  },
-  inputError: {
-    borderColor: '#ef4444',
-  },
-  errorText: {
-    margin: 0,
-    color: '#ef4444',
-    fontSize: '13px',
-    fontWeight: 500,
-  },
-  submitButton: {
-    marginTop: '8px',
-    border: 'none',
-    borderRadius: '10px',
-    padding: '14px',
-    backgroundColor: '#3b82f6',
-    color: '#ffffff',
-    fontSize: '16px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)',
+    gap: '18px',
   },
   divider: {
     margin: '24px 0',
@@ -117,7 +75,7 @@ const styles = {
     display: 'inline-block',
     padding: '0 16px',
     backgroundColor: '#ffffff',
-    color: '#6b7280',
+    color: 'var(--text-muted)',
     fontSize: '14px',
   },
   bottomText: {
@@ -127,7 +85,7 @@ const styles = {
     textAlign: 'center',
   },
   link: {
-    color: '#3b82f6',
+    color: 'var(--french-blue)',
     fontWeight: 700,
     cursor: 'pointer',
     textDecoration: 'none',
@@ -222,87 +180,35 @@ function LoginPage() {
         <p style={styles.subtitle}>Login to your account to continue</p>
 
         <form style={styles.form} onSubmit={handleSubmit}>
-          <div style={styles.field}>
-            <label style={styles.label} htmlFor="email">
-              Email Address
-            </label>
-            <input
-              style={{
-                ...styles.input,
-                ...(formErrors.email ? styles.inputError : {}),
-              }}
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#3b82f6'
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)'
-              }}
-              onBlur={(e) => {
-                if (!formErrors.email) {
-                  e.currentTarget.style.borderColor = '#e5e7eb'
-                  e.currentTarget.style.boxShadow = 'none'
-                }
-              }}
-            />
-            {formErrors.email && <p style={styles.errorText}>{formErrors.email}</p>}
-          </div>
+          <TextInputField
+            label="Email Address"
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            error={formErrors.email}
+          />
 
-          <div style={styles.field}>
-            <label style={styles.label} htmlFor="password">
-              Password
-            </label>
-            <input
-              style={{
-                ...styles.input,
-                ...(formErrors.password ? styles.inputError : {}),
-              }}
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#3b82f6'
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)'
-              }}
-              onBlur={(e) => {
-                if (!formErrors.password) {
-                  e.currentTarget.style.borderColor = '#e5e7eb'
-                  e.currentTarget.style.boxShadow = 'none'
-                }
-              }}
-            />
-            {formErrors.password && <p style={styles.errorText}>{formErrors.password}</p>}
-          </div>
+          <TextInputField
+            label="Password"
+            id="password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+            error={formErrors.password}
+          />
 
-          <button
+          <PrimaryButton
             type="submit"
-            style={{
-              ...styles.submitButton,
-              opacity: isSubmitting || !isFormValid ? 0.6 : 1,
-              cursor: isSubmitting || !isFormValid ? 'not-allowed' : 'pointer',
-            }}
             disabled={isSubmitting || !isFormValid}
-            onMouseEnter={(e) => {
-              if (isSubmitting || !isFormValid) return
-              e.currentTarget.style.backgroundColor = '#2563eb'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(59, 130, 246, 0.3)'
-            }}
-            onMouseLeave={(e) => {
-              if (isSubmitting || !isFormValid) return
-              e.currentTarget.style.backgroundColor = '#3b82f6'
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.2)'
-            }}
+            style={{ marginTop: '6px', fontSize: '15px', padding: '13px 14px' }}
           >
             {isSubmitting ? 'Logging in...' : 'Login'}
-          </button>
+          </PrimaryButton>
         </form>
 
         <p style={styles.bottomText}>
@@ -310,8 +216,8 @@ function LoginPage() {
           <span
             style={styles.link}
             onClick={() => navigate('/register')}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#3b82f6' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--imperial-blue)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--french-blue)' }}
           >
             Create one now
           </span>
