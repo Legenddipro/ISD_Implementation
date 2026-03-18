@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import Icon from '../components/ui/Icon'
@@ -118,10 +118,44 @@ const styles = {
     opacity: 0.1,
   },
   sectionTitle: {
-    margin: '0 0 24px 0',
+    margin: 0,
     fontSize: '24px',
     fontWeight: 700,
     color: '#111827',
+  },
+  sectionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '16px',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
+  },
+  sortControl: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    marginLeft: 'auto',
+  },
+  sortLabel: {
+    fontSize: '14px',
+    fontWeight: 600,
+    color: '#374151',
+    whiteSpace: 'nowrap',
+  },
+  sortSelect: {
+    minWidth: '220px',
+    height: '40px',
+    borderRadius: '10px',
+    border: '1px solid rgba(0, 41, 107, 0.18)',
+    padding: '0 38px 0 12px',
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#111827',
+    backgroundColor: '#ffffff',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+    outline: 'none',
+    cursor: 'pointer',
   },
   productsGrid: {
     display: 'grid',
@@ -173,6 +207,7 @@ function BrowseProductPage() {
   const [addingProductId, setAddingProductId] = useState(null)
   const [updatingProductId, setUpdatingProductId] = useState(null)
   const [updatingItemId, setUpdatingItemId] = useState(null)
+  const [sortOption, setSortOption] = useState('default')
 
   const { width } = useWindowSize()
   const isMobile = width < 1024
@@ -332,6 +367,33 @@ function BrowseProductPage() {
     navigate('/cart')
   }
 
+  const sectionTitleText = selectedCategory
+    ? categories.find((c) => c.id === selectedCategory)?.name || 'Products'
+    : searchQuery
+      ? `Search results for "${searchQuery}"`
+      : 'All Products'
+
+  const sortedProducts = useMemo(() => {
+    const productList = [...products]
+
+    switch (sortOption) {
+      case 'name_asc':
+        return productList.sort((a, b) =>
+          String(a?.name || '').localeCompare(String(b?.name || ''), undefined, { sensitivity: 'base' }),
+        )
+      case 'name_desc':
+        return productList.sort((a, b) =>
+          String(b?.name || '').localeCompare(String(a?.name || ''), undefined, { sensitivity: 'base' }),
+        )
+      case 'price_asc':
+        return productList.sort((a, b) => Number(a?.price || 0) - Number(b?.price || 0))
+      case 'price_desc':
+        return productList.sort((a, b) => Number(b?.price || 0) - Number(a?.price || 0))
+      default:
+        return productList
+    }
+  }, [products, sortOption])
+
   useEffect(() => {
     fetchCategories()
   }, [])
@@ -391,13 +453,37 @@ function BrowseProductPage() {
           <span style={{ ...styles.bannerDecoration, fontSize: '120px', right: '-30px' }}>🛒</span>
         </div>
 
+        <div
+          style={{
+            ...styles.sectionHeader,
+            alignItems: 'flex-start',
+          }}
+        >
+          <h2 style={styles.sectionTitle}>{sectionTitleText}</h2>
+          <div style={{ ...styles.sortControl, marginLeft: 0 }}>
+            <label htmlFor="product-sort-mobile" style={styles.sortLabel}>Sort by</label>
+            <select
+              id="product-sort-mobile"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              style={{ ...styles.sortSelect, minWidth: '190px' }}
+            >
+              <option value="default">Default</option>
+              <option value="name_asc">Name (A-Z)</option>
+              <option value="name_desc">Name (Z-A)</option>
+              <option value="price_asc">Price (Low to High)</option>
+              <option value="price_desc">Price (High to Low)</option>
+            </select>
+          </div>
+        </div>
+
         {loading ? (
           <div style={{ ...styles.productsGrid, gridTemplateColumns: '1fr' }}>
             {Array.from({ length: 4 }).map((_, index) => (
               <ProductCardSkeleton key={index} />
             ))}
           </div>
-        ) : products.length === 0 ? (
+        ) : sortedProducts.length === 0 ? (
           <div style={styles.emptyState}>
             <div style={styles.emptyIcon}><Icon name="search_off" size={58} /></div>
             <p style={styles.emptyText}>No products found</p>
@@ -405,7 +491,7 @@ function BrowseProductPage() {
           </div>
         ) : (
           <div style={{ ...styles.productsGrid, gridTemplateColumns: '1fr' }}>
-            {products.map((product) => (
+            {sortedProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={{
@@ -504,14 +590,24 @@ function BrowseProductPage() {
             <span style={styles.bannerDecoration}>🛒</span>
           </div>
 
-          <h2 style={styles.sectionTitle}>
-            {selectedCategory 
-              ? categories.find(c => c.id === selectedCategory)?.name || 'Products'
-              : searchQuery 
-                ? `Search results for "${searchQuery}"`
-                : 'All Products'
-            }
-          </h2>
+          <div style={styles.sectionHeader}>
+            <h2 style={styles.sectionTitle}>{sectionTitleText}</h2>
+            <div style={styles.sortControl}>
+              <label htmlFor="product-sort" style={styles.sortLabel}>Sort by</label>
+              <select
+                id="product-sort"
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                style={styles.sortSelect}
+              >
+                <option value="default">Default</option>
+                <option value="name_asc">Name (A-Z)</option>
+                <option value="name_desc">Name (Z-A)</option>
+                <option value="price_asc">Price (Low to High)</option>
+                <option value="price_desc">Price (High to Low)</option>
+              </select>
+            </div>
+          </div>
 
           {loading ? (
             <div style={styles.productsGrid}>
@@ -519,7 +615,7 @@ function BrowseProductPage() {
                 <ProductCardSkeleton key={index} />
               ))}
             </div>
-          ) : products.length === 0 ? (
+          ) : sortedProducts.length === 0 ? (
             <div style={styles.emptyState}>
               <div style={styles.emptyIcon}><Icon name="search_off" size={58} /></div>
               <p style={styles.emptyText}>No products found</p>
@@ -527,7 +623,7 @@ function BrowseProductPage() {
             </div>
           ) : (
             <div style={styles.productsGrid}>
-              {products.map((product) => (
+              {sortedProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={{
