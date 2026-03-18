@@ -1,11 +1,11 @@
-from sqlalchemy import Column, BigInteger, String, Text, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Text, TIMESTAMP
 from sqlalchemy.sql import func
 from database import Base
 
 class Customer(Base):
     __tablename__ = "customer"
 
-    id            = Column(BigInteger, primary_key=True, index=True)
+    id            = Column(Integer, primary_key=True, index=True, autoincrement=True)
     full_name     = Column(String(120), nullable=False)
     email         = Column(String(255), unique=True, nullable=False)
     password_hash = Column(Text, nullable=False)

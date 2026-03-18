@@ -1,12 +1,12 @@
-from sqlalchemy import Column, BigInteger, Boolean, Integer, TIMESTAMP, ForeignKey, CheckConstraint
+from sqlalchemy import Column, Boolean, Integer, TIMESTAMP, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from database import Base
 
 class EggClubMembership(Base):
     __tablename__ = "eggclub_membership"
 
-    id                   = Column(BigInteger, primary_key=True, index=True)
-    customer_id          = Column(BigInteger, ForeignKey("customer.id", ondelete="CASCADE"), unique=True, nullable=False)
+    id                   = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    customer_id          = Column(Integer, ForeignKey("customer.id", ondelete="CASCADE"), unique=True, nullable=False)
     is_active            = Column(Boolean, nullable=False, default=True)
     free_deliveries_left = Column(Integer, nullable=False, default=0)
     membership_start     = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)

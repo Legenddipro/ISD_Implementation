@@ -1,13 +1,13 @@
-from sqlalchemy import Column, BigInteger, String, Numeric, Boolean, Text, Integer, TIMESTAMP, ForeignKey, Index, CheckConstraint
+from sqlalchemy import Column, String, Numeric, Boolean, Text, Integer, TIMESTAMP, ForeignKey, Index, CheckConstraint
 from sqlalchemy.sql import func
 from database import Base
 
 class Order(Base):
     __tablename__ = "order"
 
-    id                 = Column(BigInteger, primary_key=True, index=True)
-    customer_id        = Column(BigInteger, ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    coupon_id          = Column(BigInteger, ForeignKey("coupon.id", ondelete="SET NULL"), nullable=True)
+    id                 = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    customer_id        = Column(Integer, ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
+    coupon_id          = Column(Integer, ForeignKey("coupon.id", ondelete="SET NULL"), nullable=True)
     subtotal           = Column(Numeric(10, 2), nullable=False)
     discount_amount    = Column(Numeric(10, 2), nullable=False, default=0.00)
     delivery_charge    = Column(Numeric(10, 2), nullable=False, default=0.00)
@@ -35,9 +35,9 @@ class Order(Base):
 class OrderItem(Base):
     __tablename__ = "order_item"
 
-    id         = Column(BigInteger, primary_key=True, index=True)
-    order_id   = Column(BigInteger, ForeignKey("order.id", ondelete="CASCADE"), nullable=False)
-    product_id = Column(BigInteger, ForeignKey("product.id", ondelete="CASCADE"), nullable=False)
+    id         = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    order_id   = Column(Integer, ForeignKey("order.id", ondelete="CASCADE"), nullable=False)
+    product_id = Column(Integer, ForeignKey("product.id", ondelete="CASCADE"), nullable=False)
     quantity   = Column(Integer, nullable=False)
     unit_price = Column(Numeric(10, 2), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
@@ -51,8 +51,8 @@ class OrderItem(Base):
 class Shipment(Base):
     __tablename__ = "shipment"
 
-    id                 = Column(BigInteger, primary_key=True, index=True)
-    order_id           = Column(BigInteger, ForeignKey("order.id", ondelete="CASCADE"), unique=True, nullable=False)
+    id                 = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    order_id           = Column(Integer, ForeignKey("order.id", ondelete="CASCADE"), unique=True, nullable=False)
     tracking_number    = Column(String(100), nullable=True)
     status             = Column(String(30), nullable=False, default="pending")
     estimated_delivery = Column(TIMESTAMP(timezone=True), nullable=True)

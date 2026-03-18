@@ -1,11 +1,11 @@
-from sqlalchemy import Column, BigInteger, String, Numeric, Integer, Boolean, TIMESTAMP, CheckConstraint
+from sqlalchemy import Column, String, Numeric, Integer, Boolean, TIMESTAMP, CheckConstraint
 from sqlalchemy.sql import func
 from database import Base
 
 class Coupon(Base):
     __tablename__ = "coupon"
 
-    id               = Column(BigInteger, primary_key=True, index=True)
+    id               = Column(Integer, primary_key=True, index=True, autoincrement=True)
     code             = Column(String(50), unique=True, nullable=False)
     discount_type    = Column(String(20), nullable=False)
     discount_value   = Column(Numeric(10, 2), nullable=False)
