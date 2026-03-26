@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import Icon from '../components/ui/Icon'
@@ -6,7 +6,7 @@ import { useCartStore } from '../store/cartStore'
 import { validateCoupon, placeOrder, getEggClubStatus } from '../api/orderApi'
 import { useWindowSize } from '../hooks/useWindowSize'
 
-// ─── Design tokens (match existing app) ───────────────────────────────────────
+// ─── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
   blue: 'var(--french-blue)',
   blueDark: 'var(--imperial-blue)',
@@ -38,7 +38,7 @@ const sectionTitle = {
   fontWeight: 700,
   color: C.text,
   paddingBottom: '14px',
-  borderBottom: `2px solid #f3f4f6`,
+  borderBottom: '2px solid #f3f4f6',
 }
 
 const fieldLabel = {
@@ -51,11 +51,11 @@ const fieldLabel = {
   letterSpacing: '0.04em',
 }
 
-const input = {
+const inputStyle = {
   width: '100%',
   padding: '12px 14px',
   borderRadius: '10px',
-  border: `1px solid #e5e7eb`,
+  border: '1px solid #e5e7eb',
   fontSize: '15px',
   color: C.text,
   backgroundColor: '#fafafa',
@@ -91,46 +91,47 @@ const primaryBtn = (disabled) => ({
   boxShadow: disabled ? 'none' : '0 2px 6px rgba(0,41,107,0.22)',
 })
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Component ─────────────────────────────────────────────────────────────────
 
 function CheckoutPage() {
   const navigate = useNavigate()
   const { width } = useWindowSize()
   const isMobile = width < 1024
 
-  // Cart state from store (already loaded by CartPage)
   const { cartItems, totalPrice, clearCart } = useCartStore()
 
-  // Delivery details
+  // Ref to suppress the empty-cart redirect AFTER a successful order placement
+  const orderPlacedRef = useRef(false)
+
+  // Form fields
+  const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
   const [deliveryType, setDeliveryType] = useState('standard')
   const [scheduledTime, setScheduledTime] = useState('')
-
-  // Payment
   const [paymentMethod, setPaymentMethod] = useState('cod')
 
   // Coupon
   const [couponCode, setCouponCode] = useState('')
-  const [couponResult, setCouponResult] = useState(null) // { valid, discount_amount, message }
+  const [couponResult, setCouponResult] = useState(null)
   const [couponLoading, setCouponLoading] = useState(false)
 
   // EggClub
   const [eggclub, setEggclub] = useState({ is_member: false, free_deliveries_left: 0 })
   const [useFreeDelivery, setUseFreeDelivery] = useState(false)
 
-  // Placing
+  // Submit state
   const [placing, setPlacing] = useState(false)
 
-  // ── Fetch EggClub status on mount ──
   useEffect(() => {
     getEggClubStatus()
       .then((res) => setEggclub(res.data))
-      .catch(() => {}) // silently ignore – not critical
+      .catch(() => {})
   }, [])
 
-  // Redirect away if cart is somehow empty
+  // Redirect to cart only if cart is genuinely empty (not because we just cleared it after ordering)
   useEffect(() => {
+    if (orderPlacedRef.current) return
     if (!cartItems || cartItems.length === 0) {
       navigate('/cart')
     }
@@ -144,7 +145,10 @@ function CheckoutPage() {
   const deliveryCharge = hasFreeDelivery ? 0 : 50
   const grandTotal = subtotal - discountAmount + deliveryCharge
 
-  // ── Coupon validation ──
+  const isValidPhone = (p) => /^[0-9+\-\s]{7,15}$/.test(p.trim())
+  const canPlace = phone.trim() && address.trim() && !placing
+
+  // ── Coupon ──
   const handleValidateCoupon = async () => {
     if (!couponCode.trim()) return
     setCouponLoading(true)
@@ -152,11 +156,8 @@ function CheckoutPage() {
     try {
       const res = await validateCoupon(couponCode.trim(), subtotal)
       setCouponResult(res.data)
-      if (res.data.valid) {
-        toast.success(res.data.message)
-      } else {
-        toast.error(res.data.message)
-      }
+      if (res.data.valid) toast.success(res.data.message)
+      else toast.error(res.data.message)
     } catch {
       toast.error('Failed to validate coupon.')
     } finally {
@@ -166,13 +167,14 @@ function CheckoutPage() {
 
   // ── Place order ──
   const handlePlaceOrder = async () => {
-    if (!address.trim()) {
-      toast.error('Please enter a delivery address.')
-      return
-    }
+    if (!phone.trim()) { toast.error('Please enter a phone number.'); return }
+    if (!isValidPhone(phone)) { toast.error('Please enter a valid phone number.'); return }
+    if (!address.trim()) { toast.error('Please enter a delivery address.'); return }
+
     setPlacing(true)
     try {
       const payload = {
+        phone: phone.trim(),
         delivery_address: address.trim(),
         delivery_city: city.trim() || undefined,
         delivery_time: deliveryType === 'scheduled' && scheduledTime ? scheduledTime : undefined,
@@ -182,18 +184,19 @@ function CheckoutPage() {
         use_free_delivery: useFreeDelivery && !isAutoFreeDelivery,
       }
       const res = await placeOrder(payload)
+
+      // Set ref BEFORE clearCart so the useEffect above does not redirect to /cart
+      orderPlacedRef.current = true
       clearCart()
+
       toast.success('Order placed successfully! 🎉')
       navigate('/order-success', { state: { order: res.data } })
     } catch (err) {
       const msg = err?.response?.data?.detail || 'Failed to place order. Please try again.'
       toast.error(msg)
-    } finally {
       setPlacing(false)
     }
   }
-
-  // ─────────────────────────────────────────────────────────────────────────────
 
   return (
     <div style={{ minHeight: 'calc(100vh - 72px)', backgroundColor: C.bg }}>
@@ -212,17 +215,32 @@ function CheckoutPage() {
 
         <div style={{ display: 'flex', gap: '32px', flexDirection: isMobile ? 'column' : 'row', alignItems: 'start' }}>
 
-          {/* ── LEFT: forms ── */}
+          {/* ── LEFT ── */}
           <div style={{ flex: 2, minWidth: 0 }}>
 
             {/* Delivery Details */}
             <div style={card}>
               <h2 style={sectionTitle}>📦 Delivery Details</h2>
 
+              {/* Phone */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={fieldLabel}>Phone Number *</label>
+                <input
+                  style={inputStyle}
+                  type="tel"
+                  placeholder="e.g. 01712345678"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  onFocus={(e) => { e.target.style.borderColor = C.blue }}
+                  onBlur={(e) => { e.target.style.borderColor = '#e5e7eb' }}
+                />
+              </div>
+
+              {/* Address */}
               <div style={{ marginBottom: '18px' }}>
                 <label style={fieldLabel}>Delivery Address *</label>
                 <textarea
-                  style={{ ...input, minHeight: '80px', resize: 'vertical' }}
+                  style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
                   placeholder="House/flat no., road, area…"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
@@ -231,10 +249,11 @@ function CheckoutPage() {
                 />
               </div>
 
+              {/* City */}
               <div style={{ marginBottom: '18px' }}>
                 <label style={fieldLabel}>City</label>
                 <input
-                  style={input}
+                  style={inputStyle}
                   placeholder="Dhaka"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
@@ -245,7 +264,7 @@ function CheckoutPage() {
 
               {/* Delivery type */}
               <label style={fieldLabel}>Delivery Type</label>
-              <div style={{ display: 'flex', gap: '12px', marginBottom: deliveryType === 'scheduled' ? '16px' : 0 }}>
+              <div style={{ display: 'flex', gap: '12px' }}>
                 {[['standard', '⚡ Standard'], ['scheduled', '🗓️ Scheduled']].map(([val, label]) => (
                   <div key={val} style={radioCard(deliveryType === val)} onClick={() => setDeliveryType(val)}>
                     <div style={{
@@ -264,7 +283,7 @@ function CheckoutPage() {
                   <label style={fieldLabel}>Preferred Delivery Time</label>
                   <input
                     type="datetime-local"
-                    style={input}
+                    style={inputStyle}
                     value={scheduledTime}
                     onChange={(e) => setScheduledTime(e.target.value)}
                     onFocus={(e) => { e.target.style.borderColor = C.blue }}
@@ -282,8 +301,10 @@ function CheckoutPage() {
                   ['cod', '🏠 Cash on Delivery', 'Pay when your order arrives'],
                   ['online', '💳 Online Payment', 'Pay now via card / mobile banking'],
                 ].map(([val, label, sub]) => (
-                  <div key={val} style={{ ...radioCard(paymentMethod === val), flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}
-                    onClick={() => setPaymentMethod(val)}>
+                  <div key={val}
+                    style={{ ...radioCard(paymentMethod === val), flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}
+                    onClick={() => setPaymentMethod(val)}
+                  >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div style={{
                         width: '18px', height: '18px', borderRadius: '50%',
@@ -304,7 +325,7 @@ function CheckoutPage() {
               <h2 style={sectionTitle}>🏷️ Coupon Code</h2>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <input
-                  style={{ ...input, flex: 1 }}
+                  style={{ ...inputStyle, flex: 1 }}
                   placeholder="Enter coupon code"
                   value={couponCode}
                   onChange={(e) => { setCouponCode(e.target.value); setCouponResult(null) }}
@@ -320,14 +341,14 @@ function CheckoutPage() {
                     padding: '12px 20px', borderRadius: '10px', border: 'none',
                     backgroundColor: couponLoading || !couponCode.trim() ? '#e5e7eb' : C.blue,
                     color: couponLoading || !couponCode.trim() ? C.muted : '#fff',
-                    fontWeight: 700, fontSize: '14px', cursor: couponLoading || !couponCode.trim() ? 'not-allowed' : 'pointer',
+                    fontWeight: 700, fontSize: '14px',
+                    cursor: couponLoading || !couponCode.trim() ? 'not-allowed' : 'pointer',
                     whiteSpace: 'nowrap',
                   }}
                 >
                   {couponLoading ? 'Checking…' : 'Apply'}
                 </button>
               </div>
-
               {couponResult && (
                 <div style={{
                   marginTop: '12px', padding: '12px 14px', borderRadius: '10px',
@@ -350,7 +371,8 @@ function CheckoutPage() {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, color: C.text, fontSize: '15px' }}>🥚 EggClub Membership</div>
                     <div style={{ fontSize: '13px', color: C.muted, marginTop: '2px' }}>
-                      You have <strong>{eggclub.free_deliveries_left}</strong> free {eggclub.free_deliveries_left === 1 ? 'delivery' : 'deliveries'} left
+                      You have <strong>{eggclub.free_deliveries_left}</strong> free{' '}
+                      {eggclub.free_deliveries_left === 1 ? 'delivery' : 'deliveries'} left
                     </div>
                   </div>
                   <div
@@ -378,7 +400,7 @@ function CheckoutPage() {
             )}
           </div>
 
-          {/* ── RIGHT: order summary ── */}
+          {/* ── RIGHT: summary ── */}
           <div style={{
             flex: 1, maxWidth: isMobile ? '100%' : '380px', width: isMobile ? '100%' : 'auto',
             position: isMobile ? 'static' : 'sticky', top: '96px',
@@ -386,13 +408,10 @@ function CheckoutPage() {
             <div style={{ ...card, marginBottom: 0 }}>
               <h2 style={sectionTitle}>🧾 Order Summary</h2>
 
-              {/* Items */}
               <div style={{ marginBottom: '16px' }}>
                 {cartItems.map((item, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: C.text, marginBottom: '8px' }}>
-                    <span style={{ color: C.muted }}>
-                      {item.product_name} × {item.quantity}
-                    </span>
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '8px' }}>
+                    <span style={{ color: C.muted }}>{item.product_name} × {item.quantity}</span>
                     <span style={{ fontWeight: 600 }}>৳{(item.unit_price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
@@ -404,7 +423,7 @@ function CheckoutPage() {
                   discountAmount > 0 && ['Coupon Discount', `−৳${discountAmount.toFixed(2)}`, C.green],
                   ['Delivery', hasFreeDelivery ? 'FREE 🎉' : `৳${deliveryCharge}`, hasFreeDelivery ? C.green : undefined],
                 ].filter(Boolean).map(([label, value, color], i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: C.text, marginBottom: '10px' }}>
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '10px' }}>
                     <span style={{ color: C.muted }}>{label}</span>
                     <span style={{ fontWeight: 600, color: color || C.text }}>{value}</span>
                   </div>
@@ -420,7 +439,6 @@ function CheckoutPage() {
                 <span>৳{grandTotal.toFixed(2)}</span>
               </div>
 
-              {/* Free delivery badge */}
               {isAutoFreeDelivery && (
                 <div style={{ marginTop: '12px', padding: '10px 14px', backgroundColor: C.yellow, borderRadius: '8px', fontSize: '13px', color: '#92400e', fontWeight: 600 }}>
                   🎁 Free delivery applied — order over ৳500!
@@ -429,17 +447,17 @@ function CheckoutPage() {
 
               <button
                 type="button"
-                style={{ ...primaryBtn(placing || !address.trim()), marginTop: '20px' }}
-                disabled={placing || !address.trim()}
+                style={{ ...primaryBtn(!canPlace), marginTop: '20px' }}
+                disabled={!canPlace}
                 onClick={handlePlaceOrder}
                 onMouseEnter={(e) => {
-                  if (!placing && address.trim()) {
+                  if (canPlace) {
                     e.currentTarget.style.backgroundColor = C.blueDark
                     e.currentTarget.style.transform = 'translateY(-2px)'
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!placing && address.trim()) {
+                  if (canPlace) {
                     e.currentTarget.style.backgroundColor = C.blue
                     e.currentTarget.style.transform = 'translateY(0)'
                   }
