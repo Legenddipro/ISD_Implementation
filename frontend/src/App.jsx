@@ -20,6 +20,10 @@ import RegisterPage from './pages/RegisterPage'
 import CartPage from './pages/CartPage'
 import { useAuthStore } from './store/authStore'
 
+
+import CheckoutPage from './pages/CheckoutPage'
+import OrderSuccessPage from './pages/OrderSuccessPage'
+
 const COLORS = {
   imperialBlue: '#00296b',
   frenchBlue: '#003f88',
@@ -101,6 +105,8 @@ function App() {
                 }
               />
               <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+              <Route path="/order-success" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
             </Routes>
           </main>
           <Footer />
@@ -111,3 +117,11 @@ function App() {
 }
 
 export default App
+
+
+// import CheckoutPage from './pages/CheckoutPage'
+// import OrderSuccessPage from './pages/OrderSuccessPage'
+
+// // Inside your <Routes>:
+{/* <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+<Route path="/order-success" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} /> */}

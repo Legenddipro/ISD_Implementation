@@ -288,7 +288,7 @@ function CartPage() {
   }
 
   const handleProceedToOrder = () => {
-    toast.success('Order functionality coming soon! (Module 5)')
+    navigate('/checkout')
   }
 
   useEffect(() => {

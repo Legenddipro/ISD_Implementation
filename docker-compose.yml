@@ -2,6 +2,16 @@ version: "3.9"
 
 services:
 
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    env_file: .env
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   backend:
     build: ./backend
     container_name: fastapi_backend
@@ -9,6 +19,8 @@ services:
     env_file: .env
     ports:
       - "8000:8000"
+    depends_on:
+      - db
     volumes:
       - ./backend:/app
 
@@ -23,3 +35,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+
+volumes:
+  postgres_data:
