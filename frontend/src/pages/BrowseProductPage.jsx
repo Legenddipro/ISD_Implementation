@@ -6,7 +6,7 @@ import Icon from '../components/ui/Icon'
 import CartModal from '../components/CartModal'
 import ProductCard from '../components/ProductCard'
 import ProductCardSkeleton from '../components/ProductCardSkeleton'
-import { addToCart, getCart, removeFromCart } from '../api/cartApi'
+import { addToCart, getCart, removeFromCart, updateCartItemQuantity } from '../api/cartApi'
 import { getCategories, getProducts } from '../api/productApi'
 import { useWindowSize } from '../hooks/useWindowSize'
 import { useAuthStore } from '../store/authStore'
@@ -226,6 +226,11 @@ function BrowseProductPage() {
     return response.data
   }
 
+  const applyCartResponse = (response) => {
+    setCart(response.data)
+    return response.data
+  }
+
   const getCartItemByProductId = (productId) =>
     cartItems.find((item) => Number(item?.product_id) === Number(productId))
 
@@ -267,8 +272,8 @@ function BrowseProductPage() {
 
     setAddingProductId(productId)
     try {
-      await addToCart(productId, 1)
-      await refreshCart()
+      const response = await addToCart(productId, 1)
+      applyCartResponse(response)
       openCart()
       toast.success('Item added to cart')
     } catch (error) {
@@ -287,10 +292,16 @@ function BrowseProductPage() {
 
     setUpdatingProductId(productId)
     try {
-      await addToCart(productId, 1)
-      await refreshCart()
+      const cartItem = getCartItemByProductId(productId)
+      if (!cartItem) {
+        const response = await addToCart(productId, 1)
+        applyCartResponse(response)
+      } else {
+        const response = await updateCartItemQuantity(cartItem.id, Number(cartItem.quantity || 0) + 1)
+        applyCartResponse(response)
+      }
     } catch (error) {
-      toast.error('Failed to update quantity')
+      toast.error(error?.response?.data?.detail || 'Failed to update quantity')
     } finally {
       setUpdatingProductId(null)
     }
@@ -303,13 +314,16 @@ function BrowseProductPage() {
     setUpdatingProductId(productId)
     try {
       const nextQuantity = Number(cartItem.quantity || 0) - 1
-      await removeFromCart(cartItem.id)
-      if (nextQuantity > 0) {
-        await addToCart(productId, nextQuantity)
+
+      if (nextQuantity <= 0) {
+        const response = await removeFromCart(cartItem.id)
+        applyCartResponse(response)
+      } else {
+        const response = await updateCartItemQuantity(cartItem.id, nextQuantity)
+        applyCartResponse(response)
       }
-      await refreshCart()
     } catch (error) {
-      toast.error('Failed to update quantity')
+      toast.error(error?.response?.data?.detail || 'Failed to update quantity')
     } finally {
       setUpdatingProductId(null)
     }
@@ -317,12 +331,11 @@ function BrowseProductPage() {
 
   const handleRemoveFromCart = async (itemId) => {
     try {
-      await removeFromCart(itemId)
-      const response = await getCart()
-      setCart(response.data)
+      const response = await removeFromCart(itemId)
+      applyCartResponse(response)
       toast.success('Item removed')
     } catch (error) {
-      toast.error('Failed to remove item from cart')
+      toast.error(error?.response?.data?.detail || 'Failed to remove item from cart')
     }
   }
 
@@ -332,12 +345,10 @@ function BrowseProductPage() {
 
     setUpdatingItemId(itemId)
     try {
-      const nextQuantity = Number(cartItem.quantity || 0) + 1
-      await removeFromCart(itemId)
-      await addToCart(cartItem.product_id, nextQuantity)
-      await refreshCart()
+      const response = await updateCartItemQuantity(itemId, Number(cartItem.quantity || 0) + 1)
+      applyCartResponse(response)
     } catch (error) {
-      toast.error('Failed to update quantity')
+      toast.error(error?.response?.data?.detail || 'Failed to update quantity')
     } finally {
       setUpdatingItemId(null)
     }
@@ -350,13 +361,16 @@ function BrowseProductPage() {
     setUpdatingItemId(itemId)
     try {
       const nextQuantity = Number(cartItem.quantity || 0) - 1
-      await removeFromCart(itemId)
-      if (nextQuantity > 0) {
-        await addToCart(cartItem.product_id, nextQuantity)
+
+      if (nextQuantity <= 0) {
+        const response = await removeFromCart(itemId)
+        applyCartResponse(response)
+      } else {
+        const response = await updateCartItemQuantity(itemId, nextQuantity)
+        applyCartResponse(response)
       }
-      await refreshCart()
     } catch (error) {
-      toast.error('Failed to update quantity')
+      toast.error(error?.response?.data?.detail || 'Failed to update quantity')
     } finally {
       setUpdatingItemId(null)
     }
@@ -402,6 +416,12 @@ function BrowseProductPage() {
     fetchProducts(searchQuery, selectedCategory)
   }, [searchQuery, selectedCategory])
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      refreshCart()
+    }
+  }, [isLoggedIn])
+
   if (isMobile) {
     return (
       <div style={{ padding: '20px', backgroundColor: '#f9fafb', minHeight: 'calc(100vh - 72px)' }}>
@@ -425,20 +445,20 @@ function BrowseProductPage() {
               (() => {
                 const categoryIconName = categoryIcons[category.name] || 'inventory_2'
                 return (
-              <button
-                key={category.id}
-                type="button"
-                style={{
-                  ...styles.categoryButton,
-                  ...(selectedCategory === category.id ? styles.categoryButtonActive : {}),
-                  minWidth: '140px',
-                  marginBottom: 0,
-                }}
-                onClick={() => handleCategoryClick(category.id)}
-              >
-                <span style={styles.categoryIcon}><Icon name={categoryIconName} size={18} /></span>
-                {category.name}
-              </button>
+                  <button
+                    key={category.id}
+                    type="button"
+                    style={{
+                      ...styles.categoryButton,
+                      ...(selectedCategory === category.id ? styles.categoryButtonActive : {}),
+                      minWidth: '140px',
+                      marginBottom: 0,
+                    }}
+                    onClick={() => handleCategoryClick(category.id)}
+                  >
+                    <span style={styles.categoryIcon}><Icon name={categoryIconName} size={18} /></span>
+                    {category.name}
+                  </button>
                 )
               })()
             ))}
@@ -530,6 +550,7 @@ function BrowseProductPage() {
       <aside style={styles.sidebar}>
         <div style={styles.sidebarInner}>
           <h2 style={styles.sidebarTitle}>Categories</h2>
+
           <button
             type="button"
             style={{
@@ -537,14 +558,6 @@ function BrowseProductPage() {
               ...(selectedCategory === null ? styles.categoryButtonActive : {}),
             }}
             onClick={() => handleCategoryClick(null)}
-            onMouseEnter={(e) => {
-              if (selectedCategory === null) return
-              e.currentTarget.style.backgroundColor = '#f3f4f6'
-            }}
-            onMouseLeave={(e) => {
-              if (selectedCategory === null) return
-              e.currentTarget.style.backgroundColor = 'transparent'
-            }}
           >
             <span style={styles.categoryIcon}><Icon name="storefront" size={18} /></span>
             All Products
@@ -554,26 +567,18 @@ function BrowseProductPage() {
             (() => {
               const categoryIconName = categoryIcons[category.name] || 'inventory_2'
               return (
-            <button
-              key={category.id}
-              type="button"
-              style={{
-                ...styles.categoryButton,
-                ...(selectedCategory === category.id ? styles.categoryButtonActive : {}),
-              }}
-              onClick={() => handleCategoryClick(category.id)}
-              onMouseEnter={(e) => {
-                if (selectedCategory === category.id) return
-                e.currentTarget.style.backgroundColor = 'rgba(0, 80, 157, 0.08)'
-              }}
-              onMouseLeave={(e) => {
-                if (selectedCategory === category.id) return
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              <span style={styles.categoryIcon}><Icon name={categoryIconName} size={18} /></span>
-              {category.name}
-            </button>
+                <button
+                  key={category.id}
+                  type="button"
+                  style={{
+                    ...styles.categoryButton,
+                    ...(selectedCategory === category.id ? styles.categoryButtonActive : {}),
+                  }}
+                  onClick={() => handleCategoryClick(category.id)}
+                >
+                  <span style={styles.categoryIcon}><Icon name={categoryIconName} size={18} /></span>
+                  {category.name}
+                </button>
               )
             })()
           ))}
@@ -584,7 +589,7 @@ function BrowseProductPage() {
         <div style={styles.contentInner}>
           <div style={styles.banner}>
             <div style={styles.bannerContent}>
-              <h1 style={styles.bannerTitle}>Fresh Groceries<br />Delivered Fast</h1>
+              <h1 style={styles.bannerTitle}>Fresh Groceries Delivered</h1>
               <p style={styles.bannerSubtitle}>Get everything you need, delivered to your door</p>
             </div>
             <span style={styles.bannerDecoration}>🛒</span>
@@ -592,6 +597,7 @@ function BrowseProductPage() {
 
           <div style={styles.sectionHeader}>
             <h2 style={styles.sectionTitle}>{sectionTitleText}</h2>
+
             <div style={styles.sortControl}>
               <label htmlFor="product-sort" style={styles.sortLabel}>Sort by</label>
               <select
@@ -611,7 +617,7 @@ function BrowseProductPage() {
 
           {loading ? (
             <div style={styles.productsGrid}>
-              {Array.from({ length: 6 }).map((_, index) => (
+              {Array.from({ length: 8 }).map((_, index) => (
                 <ProductCardSkeleton key={index} />
               ))}
             </div>

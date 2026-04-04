@@ -18,6 +18,11 @@ export const removeFromCart = (itemId) => {
   return axiosInstance.delete(`/cart/remove/${itemId}`)
 }
 
+export const updateCartItemQuantity = (itemId, quantity) => {
+  console.log('[cartApi] updateCartItemQuantity', { itemId, quantity })
+  return axiosInstance.patch(`/cart/items/${itemId}`, { quantity })
+}
+
 export const getCartTotal = () => {
   console.log('[cartApi] getCartTotal')
   return axiosInstance.get('/cart/total')

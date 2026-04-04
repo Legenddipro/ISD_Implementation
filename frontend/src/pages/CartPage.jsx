@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import Icon from '../components/ui/Icon'
 
 import CartItemSkeleton from '../components/CartItemSkeleton'
-import { addToCart, getCart, removeFromCart } from '../api/cartApi'
+import { getCart, removeFromCart, updateCartItemQuantity } from '../api/cartApi'
 import { useWindowSize } from '../hooks/useWindowSize'
 import { useCartStore } from '../store/cartStore'
 
@@ -240,11 +240,15 @@ function CartPage() {
 
   const setCartStore = useCartStore((state) => state.setCart)
 
+  const applyCartResponse = (data) => {
+    setCartState(data)
+    setCartStore(data)
+  }
+
   const fetchCart = async () => {
     try {
       const response = await getCart()
-      setCartState(response.data)
-      setCartStore(response.data)
+      applyCartResponse(response.data)
     } catch (error) {
       toast.error('Failed to fetch cart')
     } finally {
@@ -253,22 +257,19 @@ function CartPage() {
   }
 
   const handleQuantityChange = async (itemId, newQuantity) => {
-    if (newQuantity < 1) return
-
     setUpdatingItemId(itemId)
     try {
-      const cartItem = cart.items.find((item) => item.id === itemId)
-      if (!cartItem) {
-        toast.error('Cart item not found')
-        return
+      if (newQuantity <= 0) {
+        const response = await removeFromCart(itemId)
+        applyCartResponse(response.data)
+        toast.success('Item removed')
+      } else {
+        const response = await updateCartItemQuantity(itemId, newQuantity)
+        applyCartResponse(response.data)
+        toast.success('Quantity updated')
       }
-
-      await removeFromCart(itemId)
-      await addToCart(cartItem.product_id, newQuantity)
-      await fetchCart()
-      toast.success('Quantity updated')
     } catch (error) {
-      toast.error('Failed to update quantity')
+      toast.error(error?.response?.data?.detail || 'Failed to update quantity')
     } finally {
       setUpdatingItemId(null)
     }
@@ -277,11 +278,11 @@ function CartPage() {
   const handleRemoveItem = async (itemId) => {
     setRemovingItemId(itemId)
     try {
-      await removeFromCart(itemId)
-      await fetchCart()
+      const response = await removeFromCart(itemId)
+      applyCartResponse(response.data)
       toast.success('Item removed')
     } catch (error) {
-      toast.error('Failed to remove item')
+      toast.error(error?.response?.data?.detail || 'Failed to remove item')
     } finally {
       setRemovingItemId(null)
     }

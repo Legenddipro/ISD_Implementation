@@ -5,7 +5,7 @@ services:
   db:
     image: postgres:15
     container_name: postgres_db
-    restart: always
+    restart: "always"
     env_file: .env
     ports:
       - "5433:5432"
@@ -15,7 +15,7 @@ services:
   backend:
     build: ./backend
     container_name: fastapi_backend
-    restart: always
+    restart: "always"
     env_file: .env
     ports:
       - "8000:8000"
@@ -27,7 +27,7 @@ services:
   frontend:
     build: ./frontend
     container_name: react_frontend
-    restart: no
+    restart: "no"
     ports:
       - "5173:5173"
     depends_on:

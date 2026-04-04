@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AddItemRequest(BaseModel):
     product_id: int
-    quantity: int = 1
+    quantity: int = Field(default=1, ge=1)
+
+
+class UpdateCartItemQuantityRequest(BaseModel):
+    quantity: int = Field(ge=0)
 
 
 class CartItemResponse(BaseModel):
@@ -19,7 +23,7 @@ class CartItemResponse(BaseModel):
     subtotal: float
 
     @classmethod
-    def from_cart_item(cls, item, product_name: str) -> CartItemResponse:
+    def from_cart_item(cls, item, product_name: str) -> "CartItemResponse":
         return cls(
             id=item.id,
             product_id=item.product_id,

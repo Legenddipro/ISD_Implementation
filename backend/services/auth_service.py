@@ -20,13 +20,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
 
 
 def get_customer_by_email(db: Session, email: str) -> Optional[Customer]:
-    """Fetch a customer by email for registration, login, and auth checks."""
     normalized_email = email.strip().lower()
     return db.query(Customer).filter(Customer.email == normalized_email).first()
 
 
 def hash_password(password: str) -> str:
-    """Hash a plain-text password before saving it to the database."""
     if not password or not password.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -36,14 +34,12 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plain-text password against the stored password hash."""
     if not plain_password or not hashed_password:
         return False
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def create_access_token(customer: Customer) -> str:
-    """Create a signed JWT access token for an authenticated customer."""
     if not SECRET_KEY:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -60,7 +56,6 @@ def create_access_token(customer: Customer) -> str:
 
 
 def decode_access_token(token: str) -> dict:
-    """Decode and validate a JWT access token payload."""
     if not SECRET_KEY:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -84,8 +79,20 @@ def decode_access_token(token: str) -> dict:
     return payload
 
 
+def get_current_customer_id_from_token(token: str) -> int:
+    payload = decode_access_token(token)
+    customer_id = payload.get("sub")
+
+    try:
+        return int(customer_id)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+        ) from exc
+
+
 def register_customer(db: Session, payload: RegisterRequest) -> Customer:
-    """Create a new customer account after checking for duplicate email addresses."""
     existing_customer = get_customer_by_email(db, payload.email)
     if existing_customer:
         raise HTTPException(
@@ -122,7 +129,6 @@ def register_customer(db: Session, payload: RegisterRequest) -> Customer:
 
 
 def authenticate_customer(db: Session, payload: LoginRequest) -> Customer:
-    """Validate login credentials and return the matching customer."""
     customer = get_customer_by_email(db, payload.email)
     if not customer or not verify_password(payload.password, customer.password_hash):
         raise HTTPException(
@@ -133,7 +139,6 @@ def authenticate_customer(db: Session, payload: LoginRequest) -> Customer:
 
 
 def login_customer(db: Session, payload: LoginRequest) -> dict:
-    """Authenticate a customer and return the token response payload."""
     customer = authenticate_customer(db, payload)
     access_token = create_access_token(customer)
 
@@ -145,11 +150,9 @@ def login_customer(db: Session, payload: LoginRequest) -> dict:
 
 
 def get_current_customer_by_token(db: Session, token: str) -> Customer:
-    """Resolve the authenticated customer from a JWT token for protected routes."""
-    payload = decode_access_token(token)
-    customer_id = payload.get("sub")
+    customer_id = get_current_customer_id_from_token(token)
 
-    customer = db.query(Customer).filter(Customer.id == int(customer_id)).first()
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
