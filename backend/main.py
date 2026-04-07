@@ -12,7 +12,9 @@ app = FastAPI(title="Ecommerce API")
 # ✅ FIX: Allow both local + deployed frontend
 origins = [
     "http://localhost:5173",
-    "https://your-frontend.vercel.app",  # 🔥 CHANGE THIS AFTER DEPLOY
+    
+    
+    "https://isd-implementation-git-prachurjafinal-dipro1.vercel.app"
 ]
 
 app.add_middleware(
