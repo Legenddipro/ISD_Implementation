@@ -8,7 +8,14 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL)
+# ✅ FIX: Add SSL for Supabase (important for Railway)
+if DATABASE_URL and "supabase" in DATABASE_URL:
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"sslmode": "require"}
+    )
+else:
+    engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(
     autocommit=False,
@@ -19,8 +26,6 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 
-
-# Dependency — used in all routers
 
 def get_db():
     db = SessionLocal()

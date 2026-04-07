@@ -4,3 +4,7 @@ __pycache__/
 .venv/
 postgres_data/
 node_modules/
+Prompt.txt
+*.db
+# OS
+.DS_Store
