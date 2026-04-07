@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL,
 })
 
 axiosInstance.interceptors.request.use(
@@ -25,7 +25,6 @@ axiosInstance.interceptors.response.use(
       localStorage.clear()
       window.location.href = '/login'
     }
-
     return Promise.reject(error)
   },
 )
